@@ -64,7 +64,7 @@ function api(method, urlPath, body) {
             resolve(json);
           }
         } catch (e) {
-          reject(new Error(`API 响应解析失败: ${chunks.slice(0, 200)}`));
+          reject(new Error(`API ${method} ${urlPath} 响应解析失败: ${chunks.slice(0, 200)}`));
         }
       });
     });
@@ -149,8 +149,9 @@ function runBuild() {
 
     const candidates = fs.readdirSync(DIST).filter(f => {
       if (f.endsWith('.blockmap.check')) return false;
-      if (/\.(exe|blockmap)$/i.test(f)) return true;
       if (/^latest(-[a-z]+)?\.yml$/i.test(f)) return true;
+      // 只保留当前版本（pkg.version）的安装包 / blockmap，避免把 dist/ 里残留的旧版本一起传上去
+      if (f.includes(pkg.version) && /\.(exe|blockmap)$/i.test(f)) return true;
       return false;
     });
     if (candidates.length === 0) {
@@ -177,10 +178,22 @@ function runBuild() {
     console.log(`▶ 清空 Release 现有附件...`);
     const fullRelease = await api('GET', `/api/v5/repos/${OWNER}/${REPO}/releases/${release.id}`);
     const oldAssets = fullRelease.assets || [];
+    let deleted = 0, skipped = 0;
     for (const asset of oldAssets) {
-      await api('DELETE', `/api/v5/repos/${OWNER}/${REPO}/releases/${release.id}/attach_files/${asset.id}`);
+      try {
+        await api('DELETE', `/api/v5/repos/${OWNER}/${REPO}/releases/${release.id}/attach_files/${asset.id}`);
+        deleted++;
+      } catch (e) {
+        // 404 = 附件已不存在（ID 失效或先前已删），跳过。其他错误抛出
+        if (/→ 404:|响应解析失败.*<!DOCTYPE/i.test(e.message)) {
+          console.log(`  ↻ 附件 ${asset.name} 已不存在，跳过`);
+          skipped++;
+        } else {
+          throw e;
+        }
+      }
     }
-    console.log(`  ↻ 已删除 ${oldAssets.length} 个旧附件`);
+    console.log(`  ↻ 已删除 ${deleted} 个旧附件${skipped ? `（${skipped} 个已不存在，跳过）` : ''}`);
 
     console.log(`▶ 上传产物到 Release...`);
     for (const file of candidates) {
