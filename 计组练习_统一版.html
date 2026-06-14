@@ -1351,6 +1351,16 @@ kbd {
         </div>
       </div>
       <button class="shuffle-btn" id="shuffle-btn" onclick="shuffleToggle()">Shuffle</button>
+      <div class="theme-switcher">
+        <button class="theme-trigger" id="theme-trigger" type="button" aria-label="切换主题">
+          <span class="theme-dot" id="theme-dot"></span>
+          <span class="theme-label" id="theme-label">原版</span>
+          <span class="theme-caret">▾</span>
+        </button>
+        <div class="theme-popover" id="theme-popover" role="menu">
+          <!-- 主题选项由 JS 渲染 -->
+        </div>
+      </div>
     </div>
 
     <div class="question-card" id="question-card">
