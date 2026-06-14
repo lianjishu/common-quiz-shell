@@ -8,7 +8,7 @@ echo   计组练习统一版 - 本地服务器
 echo ============================================
 echo.
 echo   服务地址: http://localhost:8000/
-echo   统一版入口: http://localhost:8000/计组练习_统一版.html
+echo   统一版入口: http://localhost:8000/unified/index.html
 echo.
 echo   按 Ctrl+C 停止服务
 echo ============================================
@@ -29,7 +29,7 @@ if %errorlevel% neq 0 (
 )
 
 REM 自动打开浏览器
-start "" "http://localhost:8000/计组练习_统一版.html"
+start "" "http://localhost:8000/unified/index.html"
 
 REM 启动 HTTP 服务
 python -m http.server 8000
