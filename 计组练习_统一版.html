@@ -1053,6 +1053,194 @@ kbd {
   --border: #E7E5E4;
   --border-accent: rgba(15,118,110,0.2);
 }
+
+/* ============== Style 1: 极简线性图标风 覆盖 ============== */
+[data-theme="style1"] .question-card {
+  border-radius: 12px; box-shadow: none; border: 1px solid var(--border);
+}
+[data-theme="style1"] .option {
+  border-radius: 8px; border: 1px solid var(--border);
+}
+[data-theme="style1"] .btn {
+  border-radius: 6px;
+}
+[data-theme="style1"] .shuffle-btn {
+  border-radius: 6px;
+}
+
+/* ============== Style 2: 新粗野线条 覆盖 ============== */
+[data-theme="style2"] .question-card {
+  border-radius: 0; border: 3px solid var(--ink);
+  box-shadow: 8px 8px 0 var(--ink);
+}
+[data-theme="style2"] .option {
+  border-radius: 0; border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+[data-theme="style2"] .btn {
+  border-radius: 0; border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  text-transform: uppercase; font-weight: 700; letter-spacing: 0.04em;
+}
+[data-theme="style2"] .shuffle-btn {
+  border-radius: 0; border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  text-transform: uppercase; font-weight: 700; letter-spacing: 0.04em;
+}
+[data-theme="style2"] .btn-primary { background: var(--accent); }
+[data-theme="style2"] .sidebar {
+  border-right: 3px solid var(--ink);
+}
+[data-theme="style2"] .sidebar h1 {
+  border-bottom: 3px solid var(--ink);
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+}
+[data-theme="style2"] .stats h3 {
+  border-bottom: 2px solid var(--ink);
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+}
+[data-theme="style2"] .filter-btn {
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+[data-theme="style2"] .feedback {
+  border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
+  border-radius: 0; font-weight: 700;
+}
+[data-theme="style2"] .kbd {
+  background: var(--bg-card); border: 2px solid var(--ink);
+  border-radius: 0;
+}
+[data-theme="style2"] .stats-btn {
+  border-radius: 0; border: 2px solid var(--ink);
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+
+/* ============== Style 3: 手绘线稿 覆盖 ============== */
+[data-theme="style3"] body {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 17px;
+}
+[data-theme="style3"] .question-card {
+  border-radius: 10px 26px 10px 26px / 26px 10px 26px 10px;
+  border: 2.5px solid var(--ink);
+  box-shadow: 4px 6px 0 rgba(43,36,23,0.18);
+}
+[data-theme="style3"] .option {
+  border-radius: 6px 18px 6px 18px / 18px 6px 18px 6px;
+  border: 2.5px solid var(--ink);
+}
+[data-theme="style3"] .option:nth-child(even) {
+  border-radius: 18px 6px 18px 6px / 6px 18px 6px 18px;
+}
+[data-theme="style3"] .btn {
+  border-radius: 8px 18px 8px 18px;
+  border: 2.5px solid var(--ink);
+  font-family: 'Caveat', cursive; font-size: 19px; font-weight: 700;
+}
+[data-theme="style3"] .shuffle-btn {
+  border-radius: 8px 18px 8px 18px;
+  border: 2.5px solid var(--ink);
+  font-family: 'Caveat', cursive; font-size: 19px;
+}
+[data-theme="style3"] .sidebar {
+  border-right: 2.5px solid var(--ink);
+  border-radius: 6px 22px 8px 26px;
+}
+[data-theme="style3"] .sidebar h1 {
+  font-family: 'Caveat', cursive; font-size: 26px;
+}
+[data-theme="style3"] .stats h3 {
+  font-family: 'Caveat', cursive; font-size: 22px;
+}
+[data-theme="style3"] .filter-btn {
+  font-family: 'Patrick Hand', cursive;
+}
+[data-theme="style3"] .stats-btn {
+  border-radius: 8px 14px 8px 14px;
+  border: 2.5px solid var(--ink);
+}
+[data-theme="style3"] .feedback {
+  border: 2.5px dashed var(--correct);
+  border-radius: 16px 4px 16px 4px;
+}
+[data-theme="style3"] .kbd {
+  border: 2px solid var(--ink);
+  border-radius: 8px 4px 8px 4px;
+}
+[data-theme="style3"] .blank-input {
+  border: 2.5px solid var(--ink);
+  border-radius: 14px 4px 14px 4px;
+}
+
+/* ============== Style 4: 细线极简留白 覆盖 ============== */
+[data-theme="style4"] .question-card {
+  border-radius: 0; border: none;
+  border-top: 1px solid var(--line-2, var(--border));
+  border-bottom: 1px solid var(--line-2, var(--border));
+  box-shadow: none; background: transparent;
+}
+[data-theme="style4"] .option {
+  border-radius: 0; border: none;
+  border-bottom: 1px solid var(--line, var(--border));
+  background: transparent;
+}
+[data-theme="style4"] .option:hover {
+  padding-left: 8px;
+}
+[data-theme="style4"] .btn {
+  border-radius: 0; border: none;
+  background: transparent; padding: 8px 0;
+}
+[data-theme="style4"] .btn-primary {
+  color: var(--accent);
+}
+[data-theme="style4"] .shuffle-btn {
+  border-radius: 0; border: none;
+  background: transparent;
+}
+[data-theme="style4"] .sidebar {
+  border-right: 1px solid var(--line-2, var(--border));
+}
+[data-theme="style4"] .sidebar h1 {
+  font-family: 'Fraunces', serif; font-weight: 500; font-size: 24px;
+  letter-spacing: -0.01em;
+}
+[data-theme="style4"] .stats h3 {
+  font-family: 'Fraunces', serif; font-style: italic;
+  font-weight: 500; font-size: 13px;
+}
+[data-theme="style4"] .stats {
+  border-top: 1px solid var(--line, var(--border));
+  background: transparent; border: none;
+}
+[data-theme="style4"] .filter-btn {
+  font-family: 'Fraunces', serif; font-style: italic;
+}
+[data-theme="style4"] .stats-btn {
+  border: none; background: transparent;
+  font-family: 'Fraunces', serif; font-style: italic;
+  text-decoration: underline; text-decoration-color: var(--line-2, var(--border));
+}
+[data-theme="style4"] .stats-actions {
+  border-top: 1px solid var(--line, var(--border));
+}
+[data-theme="style4"] .feedback {
+  border-radius: 0; border: none;
+  border-left: 1px solid var(--ink);
+  background: transparent;
+  font-family: 'Fraunces', serif; font-style: italic;
+}
+[data-theme="style4"] .kbd {
+  border-radius: 0; border: 1px solid var(--line-2, var(--border));
+  background: transparent;
+}
+[data-theme="style4"] .blank-input {
+  border-radius: 0; border: none;
+  border-bottom: 1px solid var(--line, var(--border));
+  background: transparent;
+}
 </style>
 </head>
 <body>
