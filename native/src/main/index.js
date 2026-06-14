@@ -8,12 +8,12 @@ if (process.env.NODE_ENV !== 'production' && !process.env.ELECTRON_DISABLE_RELOA
   try {
     require('electron-reload')(
       [
-        path.join(__dirname, 'main.js'),
+        path.join(__dirname, 'index.js'),
         path.join(__dirname, 'preload.js'),
         path.join(__dirname, 'menu.js'),
         path.join(__dirname, 'window-state.js'),
-        path.join(__dirname, 'unified'),
-        path.join(__dirname, 'assets')
+        path.join(__dirname, '..', 'renderer'),
+        path.join(__dirname, '..', 'assets')
       ],
       {
         awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 50 },
@@ -51,7 +51,7 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     title: '计组练习',
-    icon: path.join(__dirname, 'assets/icon.png'),
+    icon: path.join(__dirname, '..', 'assets', 'icon.png'),
     backgroundColor: '#ffffff',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -60,7 +60,7 @@ function createWindow() {
     }
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'unified/index.html'));
+  mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
   mainWindow.on('close', () => saveWindowState(mainWindow));
   mainWindow.on('closed', () => { mainWindow = null; });
   createMenu(mainWindow);

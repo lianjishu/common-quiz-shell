@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "计算机组成原理 350 题练习（多主题）",
   "author": "yake <yake2024@163.com>",
-  "main": "main.js",
+  "main": "src/main/index.js",
   "scripts": {
     "dev": "electron-reload . --unrestricted",
     "dev:classic": "electron .",
@@ -11,7 +11,7 @@
     "build:win": "electron-builder --win --publish never",
     "build:mac": "electron-builder --mac --publish never",
     "build:linux": "electron-builder --linux --publish never",
-    "release": "node scripts/publish-gitee.js",
+    "release": "node build/publish-gitee.js",
     "release:manual": "electron-builder --win"
   },
   "build": {
@@ -21,11 +21,8 @@
       "output": "dist"
     },
     "files": [
-      "main.js",
-      "preload.js",
-      "menu.js",
-      "window-state.js",
-      "unified/**/*",
+      "src/main/**/*",
+      "src/renderer/**/*",
       "assets/**/*",
       "package.json"
     ],
@@ -34,7 +31,7 @@
 		{ "target": "nsis", "arch": ["x64"] },
 		{ "target": "portable", "arch": ["x64"] },
 		{ "target": "zip", "arch": ["x64"] }
-      ]
+      ],
       "icon": "assets/icon.ico"
     },
     "mac": {
