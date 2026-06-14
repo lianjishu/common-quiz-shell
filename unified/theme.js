@@ -2,31 +2,19 @@
 // THEME SWITCHER
 // ============================================
 const THEMES = [
-  { key: 'default', name: '极光紫' },
-  { key: 'style1',  name: '极简线性' },
-  { key: 'style2',  name: '新粗野线条' },
-  { key: 'style3',  name: '手绘线稿' },
-  { key: 'style4',  name: '细线极简留白' },
+  { key: 'default', name: '极光紫',        file: 'theme-default.css' },
+  { key: 'style1',  name: '极简线性',      file: 'theme-style1.css' },
+  { key: 'style2',  name: '新粗野线条',    file: 'theme-style2.css' },
+  { key: 'style3',  name: '手绘线稿',      file: 'theme-style3.css' },
+  { key: 'style4',  name: '细线极简留白',  file: 'theme-style4.css' },
 ];
 const KEY_THEME = 'quiz-theme';
 
 function applyTheme(key) {
   const theme = THEMES.find(t => t.key === key);
   if (!theme) return;
-  // Enable/disable theme CSS files via media attribute
-  THEMES.forEach(t => {
-    const link = document.getElementById('theme-' + t.key);
-    if (link) {
-      if (t.key === key) {
-        link.removeAttribute('media');
-        link.rel = 'stylesheet';
-      } else {
-        link.media = 'none';
-        link.rel = 'alternate stylesheet';
-      }
-    }
-  });
-  // Update switcher UI
+  const link = document.getElementById('theme-link');
+  if (link) link.href = theme.file + '?v=' + Date.now();
   document.getElementById('theme-label').textContent = theme.name;
   document.querySelectorAll('.theme-option').forEach(opt => {
     opt.classList.toggle('active', opt.dataset.theme === key);

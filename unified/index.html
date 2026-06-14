@@ -6,11 +6,7 @@
 <title>计算机组成原理 · 模拟题练习</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&family=Patrick+Hand&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme-default.css" id="theme-default">
-<link rel="stylesheet" href="theme-style1.css" id="theme-style1" disabled>
-<link rel="stylesheet" href="theme-style2.css" id="theme-style2" disabled>
-<link rel="stylesheet" href="theme-style3.css" id="theme-style3" disabled>
-<link rel="stylesheet" href="theme-style4.css" id="theme-style4" disabled>
+<link rel="stylesheet" href="theme-default.css" id="theme-link">
 <style>
 /* Theme Switcher - Fine-line Minimalist Style */
 .theme-switcher { position: relative; }
@@ -26,7 +22,7 @@
 .theme-trigger:hover { color: var(--ink, #1c1917); }
 .theme-popover {
   position: absolute; top: calc(100% + 8px); right: 0;
-  background: transparent; border: none; border-radius: 0;
+  background: var(--bg, #FAFAF9); border: none; border-radius: 0;
   box-shadow: none; border-top: 1px solid var(--line, #e7e5e4);
   min-width: 200px; padding: 0; z-index: 200;
   display: none;
@@ -43,15 +39,6 @@
 }
 .theme-option:hover { color: var(--ink, #1c1917); padding-left: 8px; }
 .theme-option.active { color: var(--ink, #1c1917); }
-.theme-option.active::before {
-  content: ''; position: absolute; left: -32px; top: 50%;
-  transform: translateY(-50%); width: 24px; height: 1px;
-  background: var(--ink, #1c1917);
-}
-.theme-option .opt-swatch {
-  width: 12px; height: 12px; border-radius: 0; flex-shrink: 0;
-  border: 1px solid var(--line, #e7e5e4);
-}
 .theme-option .opt-name { flex: 1; }
 .theme-option .opt-check {
   font-size: 13px; color: var(--ink, #1c1917); visibility: hidden;
@@ -136,13 +123,6 @@
   <aside class="answer-sheet">
     <div class="sheet-header">
       <h3>// 答题卡 Answer Sheet</h3>
-    </div>
-    <div class="sheet-toolbar" id="sheet-toolbar">
-      <button class="chip active" data-type="all">全部</button>
-      <button class="chip" data-type="单选题">单选</button>
-      <button class="chip" data-type="填空题">填空</button>
-      <button class="chip" data-type="判断题">判断</button>
-      <button class="chip" data-type="简答题">简答</button>
     </div>
     <div class="sheet-grid" id="sheet-grid"></div>
     <div class="sheet-legend">
