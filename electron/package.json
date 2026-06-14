@@ -2,6 +2,7 @@
   "name": "computer-organization-quiz",
   "version": "1.0.0",
   "description": "计算机组成原理 350 题练习（多主题）",
+  "author": "yake <yake2024@163.com>",
   "main": "main.js",
   "scripts": {
     "dev": "electron .",
