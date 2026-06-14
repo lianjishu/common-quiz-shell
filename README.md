@@ -34,8 +34,7 @@ npm install
 
 | 场景 | 命令 | 说明 |
 |---|---|---|
-| 开发（热重载） | `npm run dev` | 改 `src/main/*.js` / `src/renderer/` / `assets/` 自动重启 + 刷新 |
-| 经典启动 | `npm run dev:classic` | 不挂热重载，方便排查 reload 自身的问题 |
+| 开发（热重载） | `npm run dev` | 启动 Electron；改 `src/main/*.js` / `src/renderer/` / `assets/` 自动重启 + 刷新（`src/main/index.js` 顶部调 `electron-reload` 库实现）。排查 reload 自身问题可设 `ELECTRON_DISABLE_RELOAD=1 npm run dev` 跳过 |
 | 打包 Windows | `npm run build:win` | NSIS 安装包 + 便携版 + zip，产物在 `native/dist/` |
 | 打包 macOS | `npm run build:mac` | `.dmg` |
 | 打包 Linux | `npm run build:linux` | `.AppImage` |
@@ -176,7 +175,7 @@ require('electron-reload')(
 );
 ```
 
-`npm run dev` 跑的就是这段。改主进程任意文件或 `src/renderer/` 任意文件，dev 进程自动重启 + 窗口刷新。
+`npm run dev` 跑的就是这段。改主进程任意文件或 `src/renderer/` 任意文件，dev 进程自动重启 + 窗口刷新。设 `ELECTRON_DISABLE_RELOAD=1` 可临时关闭热重载。
 
 **主题桥接** — `src/main/menu.js` 的 `Theme` 子菜单：
 

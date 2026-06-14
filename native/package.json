@@ -5,8 +5,7 @@
   "author": "yake <yake2024@163.com>",
   "main": "src/main/index.js",
   "scripts": {
-    "dev": "electron-reload . --unrestricted",
-    "dev:classic": "electron .",
+    "dev": "electron .",
     "build": "electron-builder",
     "build:win": "electron-builder --win --publish never",
     "build:mac": "electron-builder --mac --publish never",
