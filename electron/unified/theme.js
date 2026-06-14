@@ -40,7 +40,7 @@ function renderThemeOptions() {
 }
 
 function initTheme() {
-  const saved = localStorage.getItem(KEY_THEME) || 'default';
+  const saved = localStorage.getItem(KEY_THEME) || 'style4';
   renderThemeOptions();
   applyTheme(saved);
 
