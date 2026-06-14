@@ -6,7 +6,7 @@ echo "  计组练习统一版 - 本地服务器"
 echo "============================================"
 echo
 echo "  服务地址: http://localhost:8000/"
-echo "  统一版入口: http://localhost:8000/unified/index.html"
+echo "  统一版入口: http://localhost:8000/index.html"
 echo
 echo "  按 Ctrl+C 停止服务"
 echo "============================================"
@@ -29,7 +29,7 @@ else
 fi
 
 # 自动打开浏览器（macOS 用 open，Linux 用 xdg-open）
-URL="http://localhost:8000/unified/index.html"
+URL="http://localhost:8000/index.html"
 if command -v open >/dev/null 2>&1; then
     open "$URL" &
 elif command -v xdg-open >/dev/null 2>&1; then
