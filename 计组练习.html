@@ -5,28 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>计算机组成原理 · 模拟题练习</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg-deep: #060a12;
-  --bg-main: #0a0e17;
-  --bg-card: #111827;
-  --bg-card-hover: #1a2332;
-  --bg-input: #0d1520;
-  --accent: #00e5a0;
-  --accent-dim: #00b87d;
-  --accent-glow: rgba(0,229,160,0.15);
-  --error: #ff4757;
-  --error-dim: #cc3945;
-  --error-glow: rgba(255,71,87,0.15);
-  --text: #e2e8f0;
-  --text-secondary: #94a3b8;
-  --text-dim: #475569;
-  --border: #1e293b;
-  --border-accent: #00e5a040;
+  --bg-deep: #FAF5FF;
+  --bg-main: #F7F3FD;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F3EEFE;
+  --bg-input: #F7F3FD;
+  --accent: #7C3AED;
+  --accent-dim: #6D28D9;
+  --accent-glow: rgba(124,58,237,0.08);
+  --error: #DC2626;
+  --error-dim: #B91C1C;
+  --error-glow: rgba(220,38,38,0.08);
+  --text: #0F172A;
+  --text-secondary: #64748B;
+  --text-dim: #94A3B8;
+  --border: #E8E0F4;
+  --border-accent: rgba(124,58,237,0.25);
   --radius: 10px;
   --mono: 'JetBrains Mono', 'Source Code Pro', 'Consolas', monospace;
-  --sans: 'Noto Sans SC', -apple-system, sans-serif;
+  --sans: 'Inter', 'Noto Sans SC', -apple-system, sans-serif;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -39,20 +39,15 @@ body {
   overflow-x: hidden;
 }
 
-/* Scanline overlay */
+/* Subtle texture */
 body::after {
   content: '';
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0,0,0,0.03) 2px,
-    rgba(0,0,0,0.03) 4px
-  );
+  background: radial-gradient(ellipse at 20% 50%, rgba(124,58,237,0.03) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 20%, rgba(124,58,237,0.02) 0%, transparent 50%);
   pointer-events: none;
-  z-index: 9999;
+  z-index: -1;
 }
 
 /* Layout */
@@ -64,7 +59,7 @@ body::after {
 /* Sidebar */
 .sidebar {
   width: 260px;
-  background: var(--bg-main);
+  background: var(--bg-card);
   border-right: 1px solid var(--border);
   padding: 24px 16px;
   display: flex;
@@ -115,7 +110,7 @@ body::after {
 }
 
 .filter-btn:hover {
-  background: var(--bg-card);
+  background: var(--bg-card-hover);
   color: var(--text);
 }
 
@@ -149,6 +144,7 @@ body::after {
   background: var(--bg-card);
   border-radius: var(--radius);
   border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
 .stats h3 {
@@ -177,7 +173,7 @@ body::after {
   font-weight: 500;
 }
 
-.stat-row .value.correct { color: var(--accent); }
+.stat-row .value.correct { color: #059669; }
 .stat-row .value.wrong { color: var(--error); }
 
 .stats-actions {
@@ -246,14 +242,14 @@ body::after {
 
 .progress-bar {
   height: 4px;
-  background: var(--bg-card);
+  background: var(--border);
   border-radius: 2px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent), #00b8d4);
+  background: linear-gradient(90deg, var(--accent), #A78BFA);
   border-radius: 2px;
   transition: width 0.4s ease;
 }
@@ -292,6 +288,7 @@ body::after {
   padding: 36px 40px;
   position: relative;
   animation: fadeIn 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
 }
 
 @keyframes fadeIn {
@@ -361,7 +358,7 @@ body::after {
 }
 
 .option:hover:not(.disabled) {
-  border-color: var(--text-dim);
+  border-color: var(--accent);
   background: var(--bg-card-hover);
 }
 
@@ -383,19 +380,19 @@ body::after {
 
 .option.selected {
   border-color: var(--accent);
-  background: var(--accent-glow);
+  background: rgba(124,58,237,0.06);
 }
 
 .option.selected .opt-letter { color: var(--accent); }
 .option.selected .opt-text { color: var(--text); }
 
 .option.correct {
-  border-color: var(--accent);
-  background: var(--accent-glow);
+  border-color: #059669;
+  background: rgba(5,150,105,0.08);
 }
 
-.option.correct .opt-letter { color: var(--accent); }
-.option.correct .opt-text { color: var(--accent); }
+.option.correct .opt-letter { color: #059669; }
+.option.correct .opt-text { color: #059669; }
 
 .option.wrong {
   border-color: var(--error);
@@ -438,19 +435,19 @@ body::after {
 }
 
 .judge-btn:hover:not(.disabled) {
-  border-color: var(--text-dim);
+  border-color: var(--accent);
   background: var(--bg-card-hover);
 }
 
 .judge-btn.selected-correct {
-  border-color: var(--accent);
-  background: var(--accent-glow);
-  color: var(--accent);
+  border-color: #059669;
+  background: rgba(5,150,105,0.08);
+  color: #059669;
 }
 
 .judge-btn.selected-wrong {
   border-color: var(--error);
-  background: var(--error-glow);
+  background: rgba(220,38,38,0.06);
   color: var(--error);
 }
 
@@ -503,13 +500,13 @@ body::after {
 }
 
 .blank-input.correct {
-  border-color: var(--accent);
-  background: rgba(0,229,160,0.05);
+  border-color: #059669;
+  background: rgba(5,150,105,0.05);
 }
 
 .blank-input.wrong {
   border-color: var(--error);
-  background: rgba(255,71,87,0.05);
+  background: rgba(220,38,38,0.05);
 }
 
 .blank-input:disabled {
@@ -520,7 +517,7 @@ body::after {
 .blank-answer {
   font-family: var(--mono);
   font-size: 13px;
-  color: var(--accent);
+  color: #059669;
   margin-top: 4px;
   display: none;
 }
@@ -557,8 +554,8 @@ body::after {
 .essay-answer {
   margin-top: 16px;
   padding: 16px;
-  background: var(--accent-glow);
-  border: 1px solid var(--border-accent);
+  background: rgba(5,150,105,0.06);
+  border: 1px solid rgba(5,150,105,0.2);
   border-radius: 10px;
   display: none;
 }
@@ -570,7 +567,7 @@ body::after {
 .essay-answer h4 {
   font-family: var(--mono);
   font-size: 12px;
-  color: var(--accent);
+  color: #059669;
   letter-spacing: 1px;
   margin-bottom: 10px;
 }
@@ -600,14 +597,14 @@ body::after {
 }
 
 .feedback.correct {
-  background: var(--accent-glow);
-  border: 1px solid var(--border-accent);
-  color: var(--accent);
+  background: rgba(5,150,105,0.08);
+  border: 1px solid rgba(5,150,105,0.2);
+  color: #059669;
 }
 
 .feedback.wrong {
-  background: var(--error-glow);
-  border: 1px solid rgba(255,71,87,0.3);
+  background: rgba(220,38,38,0.06);
+  border: 1px solid rgba(220,38,38,0.2);
   color: var(--error);
 }
 
@@ -694,7 +691,7 @@ kbd {
   font-family: var(--mono);
   font-size: 11px;
   padding: 2px 6px;
-  background: var(--bg-card);
+  background: var(--bg-main);
   border: 1px solid var(--border);
   border-radius: 4px;
   color: var(--text-secondary);
