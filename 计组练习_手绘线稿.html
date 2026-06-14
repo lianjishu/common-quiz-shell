@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>计算机组成原理 · 模拟题练习</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&family=Inter:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --paper: #F5F1E8;
+  --paper-2: #FBF7EC;
+  --ink: #2B2417;
+  --ink-2: #5C4F3A;
+  --orange: #D97706;
+  --orange-soft: #FEF3C7;
+  --correct: #65A30D;
+  --correct-soft: #ECFCCB;
+  --wrong: #B91C1C;
+  --wrong-soft: #FEE2E2;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Patrick Hand', 'Inter', 'Noto Sans SC', sans-serif;
+  --display: 'Caveat', cursive;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { font-family: var(--sans); background: var(--paper); color: var(--ink); min-height: 100vh; overflow-x: hidden; font-size: 17px; }
+body::after {
+  content: ''; position: fixed; inset: 0;
+  background-image: repeating-linear-gradient(transparent 0 31px, rgba(43,36,23,0.05) 31px 32px);
+  pointer-events: none; z-index: -1;
+}
+
+.app { display: flex; min-height: 100vh; }
+
+/* Sidebar */
+.sidebar {
+  width: 270px; background: var(--paper-2);
+  border: 2.5px solid var(--ink); border-radius: 6px 22px 8px 26px / 22px 8px 26px 6px;
+  margin: 16px 0 16px 16px; padding: 20px 14px;
+  display: flex; flex-direction: column; gap: 4px;
+  position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 100;
+  transform: rotate(-0.4deg);
+  box-shadow: 4px 5px 0 rgba(43,36,23,0.18);
+}
+.sidebar h1 {
+  font-family: var(--display); font-size: 26px; font-weight: 700; color: var(--orange);
+  padding: 4px 8px; margin-bottom: 18px; line-height: 1.3;
+  text-decoration: underline; text-decoration-style: wavy; text-decoration-color: var(--orange);
+  text-underline-offset: 5px;
+}
+.sidebar h1 span { display: block; font-size: 16px; color: var(--ink-2); font-family: var(--sans); text-decoration: none; font-weight: 400; margin-top: 4px; }
+
+.filter-btn {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  background: transparent; border: 2px solid transparent;
+  border-radius: 4px 14px 4px 14px; color: var(--ink-2);
+  font-size: 17px; font-family: var(--sans); cursor: pointer; transition: all 0.12s;
+}
+.filter-btn::before { content: '✦'; color: var(--orange); font-family: var(--display); font-size: 18px; }
+.filter-btn:hover { background: rgba(217,119,6,0.08); color: var(--ink); }
+.filter-btn.active { background: var(--orange-soft); border: 2px solid var(--ink); color: var(--ink); font-weight: 700; }
+.filter-btn .count { margin-left: auto; font-family: var(--mono); font-size: 13px; }
+.filter-btn.active .count { color: var(--ink); }
+
+.sidebar-divider { height: 0; border-top: 2px dashed var(--ink-2); margin: 14px 0; opacity: 0.5; }
+
+.stats {
+  margin-top: auto; padding: 14px; background: var(--paper-2);
+  border: 2.5px solid var(--ink); border-radius: 18px 6px 22px 6px / 6px 22px 6px 18px;
+  transform: rotate(0.3deg);
+}
+.stats h3 { font-family: var(--display); font-size: 22px; color: var(--orange); margin-bottom: 12px; font-weight: 700; }
+.stat-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 16px; }
+.stat-row .label { color: var(--ink-2); }
+.stat-row .value { font-family: var(--mono); font-weight: 700; color: var(--ink); }
+.stat-row .value.correct { color: var(--correct); }
+.stat-row .value.wrong { color: var(--wrong); }
+
+.stats-actions { display: flex; gap: 8px; margin-top: 14px; }
+.stats-btn { flex: 1; padding: 7px 0; background: var(--paper-2); border: 2.5px solid var(--ink); border-radius: 8px 14px 8px 14px; color: var(--ink); font-size: 14px; font-family: var(--sans); cursor: pointer; transition: all 0.12s; box-shadow: 2px 2px 0 rgba(43,36,23,0.2); }
+.stats-btn:hover { transform: translate(-1px,-1px) rotate(-1deg); }
+.stats-btn.danger:hover { background: var(--wrong-soft); }
+
+/* Main */
+.main { flex: 1; margin-left: 286px; padding: 32px 48px; display: flex; flex-direction: column; align-items: center; }
+
+/* Top bar */
+.top-bar { width: 100%; max-width: 780px; display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+.progress-wrap { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.progress-info { display: flex; justify-content: space-between; font-size: 15px; color: var(--ink-2); font-family: var(--display); font-size: 20px; font-weight: 700; }
+.progress-bar { height: 16px; background: var(--paper-2); border: 2.5px solid var(--ink); border-radius: 4px 14px 4px 14px; position: relative; overflow: hidden; }
+.progress-fill {
+  height: 100%; background: var(--orange);
+  background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.5) 5px 6px);
+  transition: width 0.4s ease;
+}
+.shuffle-btn {
+  padding: 9px 16px; background: var(--paper-2); border: 2.5px solid var(--ink);
+  border-radius: 8px 14px 8px 14px; color: var(--ink); font-size: 17px; font-family: var(--sans);
+  cursor: pointer; transition: all 0.12s; box-shadow: 3px 3px 0 rgba(43,36,23,0.2);
+}
+.shuffle-btn:hover { transform: translate(-1px,-1px) rotate(-2deg); box-shadow: 4px 4px 0 rgba(43,36,23,0.25); }
+.shuffle-btn.active { background: var(--orange-soft); }
+
+/* Question card */
+.question-card {
+  width: 100%; max-width: 780px; background: var(--paper-2);
+  border: 2.5px solid var(--ink); border-radius: 10px 26px 10px 26px / 26px 10px 26px 10px;
+  padding: 32px 36px; position: relative; animation: fadeIn 0.3s ease;
+  transform: rotate(0.3deg); box-shadow: 4px 6px 0 rgba(43,36,23,0.18);
+}
+@keyframes fadeIn { from { opacity: 0; transform: rotate(0.3deg) translateY(12px); } to { opacity: 1; transform: rotate(0.3deg) translateY(0); } }
+
+.q-header { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
+.q-number { font-family: var(--display); font-size: 18px; font-weight: 700; color: var(--ink); padding: 2px 14px; border: 2.5px solid var(--ink); border-radius: 16px 4px 16px 4px; background: var(--paper); transform: rotate(-1.5deg); display: inline-block; }
+.q-type { font-family: var(--display); font-size: 18px; font-weight: 700; color: var(--ink); padding: 2px 14px; border: 2.5px solid var(--ink); border-radius: 4px 16px 4px 16px; background: var(--orange-soft); transform: rotate(1.5deg); display: inline-block; }
+.q-points { font-family: var(--mono); font-size: 14px; color: var(--ink-2); margin-left: auto; padding: 2px 10px; }
+
+.q-text { font-family: var(--display); font-size: 28px; font-weight: 700; line-height: 1.3; color: var(--ink); margin-bottom: 28px; white-space: pre-wrap; }
+
+/* Options */
+.options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+.option {
+  display: flex; align-items: flex-start; gap: 14px; padding: 12px 18px;
+  background: var(--paper-2); border: 2.5px solid var(--ink);
+  border-radius: 6px 18px 6px 18px / 18px 6px 18px 6px;
+  cursor: pointer; transition: all 0.12s; user-select: none; font-size: 17px;
+}
+.option:nth-child(even) { border-radius: 18px 6px 18px 6px / 6px 18px 6px 18px; transform: rotate(0.3deg); }
+.option:nth-child(odd) { transform: rotate(-0.2deg); }
+.option:hover:not(.disabled) { transform: rotate(0deg) scale(1.01); box-shadow: 3px 3px 0 rgba(43,36,23,0.2); }
+.option .opt-letter {
+  width: 30px; height: 30px; border: 2.5px solid var(--ink); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--display); font-weight: 700; font-size: 20px; color: var(--ink);
+  min-width: 30px; flex-shrink: 0; background: var(--paper);
+}
+.option .opt-text { font-size: 17px; line-height: 1.5; color: var(--ink); flex: 1; padding-top: 2px; }
+.option.selected { background: var(--orange-soft); }
+.option.correct { background: var(--correct-soft); border-color: var(--correct); }
+.option.correct .opt-letter { background: var(--correct); color: white; border-color: var(--correct); }
+.option.correct .opt-text { color: var(--correct); font-weight: 700; }
+.option.wrong { background: var(--wrong-soft); border-color: var(--wrong); }
+.option.wrong .opt-letter { background: var(--wrong); color: white; border-color: var(--wrong); }
+.option.wrong .opt-text { color: var(--wrong); font-weight: 700; }
+.option.disabled { cursor: default; }
+
+/* Judge */
+.judge-btns { display: flex; gap: 16px; margin-bottom: 28px; }
+.judge-btn {
+  flex: 1; padding: 18px; background: var(--paper-2); border: 2.5px solid var(--ink);
+  border-radius: 18px 6px 18px 6px / 6px 18px 6px 18px; cursor: pointer; transition: all 0.12s;
+  text-align: center; font-size: 22px; font-weight: 700; color: var(--ink); font-family: var(--display);
+}
+.judge-btn:nth-child(2) { border-radius: 6px 18px 6px 18px / 18px 6px 18px 6px; transform: rotate(0.5deg); }
+.judge-btn:nth-child(1) { transform: rotate(-0.3deg); }
+.judge-btn:hover:not(.disabled) { transform: rotate(0deg) scale(1.02); box-shadow: 3px 3px 0 rgba(43,36,23,0.2); }
+.judge-btn.selected-correct { background: var(--correct-soft); border-color: var(--correct); color: var(--correct); }
+.judge-btn.selected-wrong { background: var(--wrong-soft); border-color: var(--wrong); color: var(--wrong); }
+.judge-btn.disabled { cursor: default; }
+
+/* Blanks */
+.blanks { display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px; }
+.blank-row { display: flex; align-items: center; gap: 12px; }
+.blank-label { font-family: var(--display); font-size: 20px; font-weight: 700; color: var(--ink); min-width: 36px; padding: 2px 8px; }
+.blank-input {
+  flex: 1; padding: 10px 16px; background: var(--paper-2); border: 2.5px solid var(--ink);
+  border-radius: 14px 4px 14px 4px; color: var(--ink); font-size: 17px;
+  font-family: var(--sans); outline: none; transition: all 0.12s;
+}
+.blank-input:focus { background: var(--orange-soft); }
+.blank-input.correct { background: var(--correct-soft); border-color: var(--correct); }
+.blank-input.wrong { background: var(--wrong-soft); border-color: var(--wrong); }
+.blank-input:disabled { cursor: default; }
+.blank-answer { font-family: var(--display); font-size: 18px; font-weight: 700; color: var(--correct); margin-top: 4px; display: none; padding: 2px 12px; }
+.blank-answer.show { display: block; }
+
+/* Essay */
+.essay-area { margin-bottom: 28px; }
+.essay-textarea {
+  width: 100%; min-height: 130px; padding: 14px; background: var(--paper-2);
+  border: 2.5px solid var(--ink); border-radius: 16px 4px 16px 4px;
+  color: var(--ink); font-size: 17px; font-family: var(--sans); line-height: 1.7;
+  resize: vertical; outline: none;
+}
+.essay-textarea:focus { background: var(--orange-soft); }
+.essay-answer { margin-top: 16px; padding: 14px; background: var(--correct-soft); border: 2.5px dashed var(--correct); border-radius: 16px 4px 16px 4px; display: none; }
+.essay-answer.show { display: block; }
+.essay-answer h4 { font-family: var(--display); font-size: 22px; font-weight: 700; color: var(--correct); margin-bottom: 8px; }
+.essay-answer p { font-size: 17px; line-height: 1.7; color: var(--ink); white-space: pre-wrap; }
+
+/* Feedback */
+.feedback { padding: 14px 18px; background: var(--correct-soft); border: 2.5px dashed var(--correct); border-radius: 16px 4px 16px 4px; font-size: 17px; font-weight: 700; display: none; margin-bottom: 20px; animation: fadeIn 0.2s ease; color: var(--ink); }
+.feedback.show { display: flex; align-items: center; gap: 10px; }
+.feedback.correct { background: var(--correct-soft); border-color: var(--correct); color: var(--ink); }
+.feedback.wrong { background: var(--wrong-soft); border-color: var(--wrong); color: var(--ink); }
+.feedback strong { font-family: var(--display); font-size: 22px; }
+
+/* Actions */
+.actions { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; }
+.btn {
+  padding: 11px 24px; background: var(--paper-2); border: 2.5px solid var(--ink);
+  border-radius: 10px 18px 10px 18px; color: var(--ink); font-size: 19px; font-weight: 700;
+  font-family: var(--display); cursor: pointer; box-shadow: 3px 3px 0 rgba(43,36,23,0.2);
+  transition: all 0.12s;
+}
+.btn:hover { transform: translate(-2px,-2px) rotate(-1deg); box-shadow: 5px 5px 0 rgba(43,36,23,0.25); }
+.btn-primary { background: var(--orange); }
+.btn-primary:disabled { opacity: 0.4; cursor: default; }
+.btn-secondary { background: var(--paper-2); }
+
+/* Empty / Hints */
+.empty-state { text-align: center; padding: 80px 40px; color: var(--ink-2); }
+.empty-state .icon { font-family: var(--display); font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+.empty-state p { font-size: 17px; line-height: 1.8; }
+
+.kbd-hints { display: flex; gap: 16px; justify-content: center; margin-top: 24px; font-size: 14px; color: var(--ink-2); flex-wrap: wrap; }
+.kbd-hints span { display: flex; align-items: center; gap: 4px; }
+kbd { font-family: var(--mono); font-size: 12px; padding: 2px 8px; background: var(--orange-soft); border: 2px solid var(--ink); border-radius: 8px 4px 8px 4px; color: var(--ink); font-weight: 700; }
+
+@media (max-width: 768px) {
+  .sidebar { width: calc(100% - 16px); position: relative; margin: 8px; flex-direction: row; flex-wrap: wrap; padding: 12px; gap: 4px; transform: none; }
+  .sidebar h1 { width: 100%; font-size: 22px; margin-bottom: 8px; padding: 4px 8px; }
+  .sidebar h1 span { display: none; }
+  .filter-btn { padding: 6px 10px; font-size: 15px; }
+  .stats { display: none; } .sidebar-divider { display: none; }
+  .main { margin-left: 0; padding: 16px; }
+  .question-card { padding: 20px; transform: none; }
+  .q-text { font-size: 22px; }
+  .kbd-hints { display: none; }
+}
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--paper); }
+::-webkit-scrollbar-thumb { background: var(--ink-2); border-radius: 4px; }
+
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <h1>
+      计组 · 模拟题
+      <span>Computer Organization Quiz</span>
+    </h1>
+    <button class="filter-btn active" data-filter="全部">全部 <span class="count" id="count-all"></span></button>
+    <button class="filter-btn" data-filter="单选题">单选题 <span class="count" id="count-单选题"></span></button>
+    <button class="filter-btn" data-filter="填空题">填空题 <span class="count" id="count-填空题"></span></button>
+    <button class="filter-btn" data-filter="判断题">判断题 <span class="count" id="count-判断题"></span></button>
+    <button class="filter-btn" data-filter="简答题">简答题 <span class="count" id="count-简答题"></span></button>
+    <div class="sidebar-divider"></div>
+    <button class="filter-btn" data-filter="错题">错题回顾 <span class="count" id="count-wrong"></span></button>
+    <div class="stats">
+      <h3>// 统计</h3>
+      <div class="stat-row">
+        <span class="label">已做</span>
+        <span class="value" id="stat-done">0 / 0</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">正确</span>
+        <span class="value correct" id="stat-correct">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">错误</span>
+        <span class="value wrong" id="stat-wrong">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">正确率</span>
+        <span class="value" id="stat-rate">--%</span>
+      </div>
+      <div class="stats-actions">
+        <button class="stats-btn" onclick="shuffleToggle()">随机顺序</button>
+        <button class="stats-btn danger" onclick="resetProgress()">重置进度</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="top-bar">
+      <div class="progress-wrap">
+        <div class="progress-info">
+          <span id="progress-text">第 1 题 / 350</span>
+          <span id="progress-pct">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+      <button class="shuffle-btn" id="shuffle-btn" onclick="shuffleToggle()">Shuffle</button>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <!-- Rendered by JS -->
+    </div>
+
+    <div class="kbd-hints">
+      <span><kbd>1</kbd>-<kbd>4</kbd> 选择选项</span>
+      <span><kbd>Enter</kbd> 下一题 / 提交</span>
+      <span><kbd>Space</kbd> 显示答案(简答)</span>
+    </div>
+  </main>
+</div>
+
+<script>
+// ============================================
+// EMBEDDED QUESTION DATA
+// ============================================
+const MARKDOWN_DATA = [{"id": 1, "type": "单选题", "points": 0.2, "question": "第一代电子计算机主要应用于(        )领域。", "answer": "A", "options": ["A. 科学计算", "B. 数据处理", "C. 自动控制", "D. 人工智能"]}, {"id": 2, "type": "单选题", "points": 0.2, "question": "第一代电子计算机的基本组成元件是(        )。", "answer": "A", "options": ["A. 电子管", "B. 晶体二极管", "C. 晶体三极管", "D. 场效应管"]}, {"id": 3, "type": "单选题", "points": 0.2, "question": "1946年2月，在美国宾夕法尼亚大学诞生了世界上第一台电子数字计算机，它的名字叫(        )。", "answer": "C", "options": ["A. EDVAC", "B. EDSAC", "C. ENIAC", "D. UNIVAC-I"]}, {"id": 4, "type": "单选题", "points": 0.2, "question": "从(        )电子计算机开始，计算机的组成元件开始使用集成电路。", "answer": "C", "options": ["A. 第一代", "B. 第二代", "C. 第三代", "D. 第四代"]}, {"id": 5, "type": "单选题", "points": 0.2, "question": "微型计算机的基本组成元件是(        )。", "answer": "D", "options": ["A. 电子管", "B. 晶体三极管", "C. 中、小规模集成电路", "D. 大规模、超大规模集成电路"]}, {"id": 6, "type": "单选题", "points": 0.2, "question": "电子计算机技术在半个多世纪取得了很大的进步，但其工作原理仍然遵循着美籍匈牙利数学家(        )提出的设计思想。", "answer": "D", "options": ["A. 巴贝奇", "B. 乔治·布尔", "C. 阿伦·图灵", "D. 冯·诺依曼"]}, {"id": 7, "type": "单选题", "points": 0.2, "question": "冯·诺依曼关于计算机设计思想的核心是(        )。", "answer": "B", "options": ["A. 二进制", "B. 存储程序", "C. 五大部件", "D. 总线结构"]}, {"id": 8, "type": "单选题", "points": 0.2, "question": "典型的冯·诺依曼计算机是以(        )为中心的。", "answer": "A", "options": ["A. 运算器", "B. 控制器", "C. 存储器", "D. 系统总线"]}, {"id": 9, "type": "单选题", "points": 0.2, "question": "现代计算机在系统结构上是以(        )为中心。", "answer": "C", "options": ["A. 运算器", "B. 控制器", "C. 存储器", "D. 系统总线"]}, {"id": 10, "type": "单选题", "points": 0.2, "question": "运算器是完成(        )算术和逻辑运算的部件，由一组通用寄存器和算术逻辑运算单元(ALU)组成。", "answer": "B", "options": ["A. 十进制", "B. 二进制", "C. 八进制", "D. 十六进制"]}, {"id": 11, "type": "单选题", "points": 0.2, "question": "控制器是统一指挥和控制计算机各部件的中央机构，其主要功能是(        )。", "answer": "D", "options": ["A. 完成各种算术运算和逻辑运算", "B. 形成操作数的有效地址", "C. 负责CPU与主存储器和外部设备的信息传送", "D. 从存储器逐条取出指令，分析并执行指令"]}, {"id": 12, "type": "单选题", "points": 0.2, "question": "存储器是用来存放程序和数据的部件，它由若干个存储单元组成，每个存储单元都是按(        )访问的。", "answer": "A", "options": ["A. 地址", "B. 内容", "C. 操作码", "D. 程序状态字"]}, {"id": 13, "type": "单选题", "points": 0.2, "question": "CPU又称为中央处理器，是计算机系统的核心部件，它由(        )和(        )组成。", "answer": "B", "options": ["A. 运算器、存储器", "B. 运算器、控制器", "C. 控制器、存储器", "D. 控制器、操作系统"]}, {"id": 14, "type": "单选题", "points": 0.2, "question": "在电子计算机中信息采用二进制代码表示的原因是(        )。", "answer": "C", "options": ["A. 节省元器件", "B. 提高运算速度", "C. 运算规则简单，易于用开关电路实现", "D. 降低功耗"]}, {"id": 15, "type": "单选题", "points": 0.2, "question": "软件和硬件在逻辑上是等效的，即用硬件实现的功能，在原理上也可以用软件实现，反之亦然。但硬件实现的优势在于(        )。", "answer": "A", "options": ["A. 速度快", "B. 成本低", "C. 容量大", "D. 灵活性好"]}, {"id": 16, "type": "单选题", "points": 0.2, "question": "计算机硬件能直接识别的语言是(        )。", "answer": "A", "options": ["A. 机器语言", "B. 汇编语言", "C. 高级语言", "D. 数据库语言"]}, {"id": 17, "type": "单选题", "points": 0.2, "question": "计算机的软件系统由系统软件和应用软件组成，其中系统软件的核心是(        )。", "answer": "A", "options": ["A. 操作系统", "B. 语言处理程序", "C. 数据库管理系统", "D. 各种服务程序"]}, {"id": 18, "type": "单选题", "points": 0.2, "question": "将源程序转换成计算机能直接识别的二进制代码组成的机器语言，这项工作是由(        )完成的。", "answer": "C", "options": ["A. 指令系统", "B. 调试程序", "C. 语言处理程序", "D. 数据库管理系统"]}, {"id": 19, "type": "单选题", "points": 0.2, "question": "下列软件系统中属于应用软件的是(        )。", "answer": "D", "options": ["A. 操作系统", "B. 编译程序", "C. 连接程序", "D. 文字处理程序"]}, {"id": 20, "type": "单选题", "points": 0.2, "question": "在具有四级层次结构的计算机系统中，位于最底层的是(        )机器。", "answer": "D", "options": ["A. 高级语言", "B. 汇编语言", "C. 机器语言", "D. 微程序"]}, {"id": 21, "type": "单选题", "points": 0.2, "question": "计算机的基本字长是指参与运算的数的基本位数，它与(        )有关。", "answer": "C", "options": ["A. CPU时钟频率", "B. 主存容量", "C. 运算精度", "D. 可靠性"]}, {"id": 22, "type": "单选题", "points": 0.2, "question": "衡量计算机存储容量大小的最基本单位是字节，一个字节由(        )个二进制位组成。", "answer": "B", "options": ["A. 4", "B. 8", "C. 16", "D. 32"]}, {"id": 23, "type": "单选题", "points": 0.2, "question": "以下哪一个指标是用于衡量计算机工作的可靠性的?", "answer": "B", "options": ["A. MIPS", "B. MTBF", "C. CPI", "D. FLOPS"]}, {"id": 24, "type": "单选题", "points": 0.2, "question": "按照(        )来分类，可把电子计算机分为模拟计算机和数字计算机两大类。", "answer": "A", "options": ["A. 处理的信息形式", "B. 计算机的规模", "C. 机器字长", "D. 应用范围"]}, {"id": 25, "type": "单选题", "points": 0.2, "question": "按照(        )来分类，可把电子计算机分为专用机和通用机两种类型。", "answer": "D", "options": ["A. 处理的信息形式", "B. 计算机的规模", "C. 机器字长", "D. 应用范围"]}, {"id": 26, "type": "单选题", "points": 0.2, "question": "按照(        )来分类，可把电子计算机分为8位机、16位机、32位机、64位机等几种类型。", "answer": "C", "options": ["A. 处理的信息形式", "B. 计算机的规模", "C. 机器字长", "D. 应用范围"]}, {"id": 27, "type": "单选题", "points": 0.2, "question": "若按计算机的规模进行分类，目前家庭和办公部门广泛使用的个人台式机属于(        )。", "answer": "D", "options": ["A. 巨型计算机", "B. 大型计算机", "C. 中型计算机", "D. 微型计算机"]}, {"id": 28, "type": "单选题", "points": 0.2, "question": "定点数是指小数点位置固定不变的机器数，对于定点整数而言，小数点的位置在(        )。", "answer": "B", "options": ["A. 最高位的左边", "B. 最低位的右边", "C. 最高位与次高位之间", "D. 最低位与次低位之间"]}, {"id": 29, "type": "单选题", "points": 0.2, "question": "定点数是指小数点位置固定不变的机器数，对于定点小数而言，小数点的位置在(        )。", "answer": "C", "options": ["A. 最高位的左边", "B. 最低位的右边", "C. 最高位与次高位之间", "D. 最低位与次低位之间"]}, {"id": 30, "type": "单选题", "points": 0.2, "question": "对于定点小数x，当x取值为负时，[x]原=(        )。", "answer": "B", "options": ["A. x", "B. 1-x", "C. 1+x", "D. 2+x"]}, {"id": 31, "type": "单选题", "points": 0.2, "question": "对于定点小数x，当x取值为负时，[x]补=(        )。", "answer": "D", "options": ["A. x", "B. 1-x", "C. 1+x", "D. 2+x"]}, {"id": 32, "type": "单选题", "points": 0.2, "question": "用原码表示16位带符号的定点整数，其数值表示范围是(        )。", "answer": "C", "options": ["A. -2^15+1~2^15", "B. -2^15~2^15", "C. -2^15+1~2^15-1", "D. -2^15~2^15-1"]}, {"id": 33, "type": "单选题", "points": 0.2, "question": "用补码表示16位带符号的定点整数，其数值表示范围是(        )。", "answer": "D", "options": ["A. -2^15+1~2^15", "B. -2^15~2^15", "C. -2^15+1~2^15-1", "D. -2^15~2^15-1"]}, {"id": 34, "type": "单选题", "points": 0.2, "question": "用原码表示16位带符号的定点小数，其数值表示范围是(        )。", "answer": "C", "options": ["A. -1+2^{-15}~1", "B. -1~1", "C. -1+2^{-15}~1-2^{-15}", "D. -1~1-2^{-15}"]}, {"id": 35, "type": "单选题", "points": 0.2, "question": "用补码表示16位带符号的定点小数，其数值表示范围是(        )。", "answer": "D", "options": ["A. -1+2^{-15}~1", "B. -1~1", "C. -1+2^{-15}~1-2^{-15}", "D. -1~1-2^{-15}"]}, {"id": 36, "type": "单选题", "points": 0.2, "question": "补码是一种有模运算，对于16位带符号的定点整数，若以补码表示则模等于(        )。", "answer": "D", "options": ["A. 1", "B. 2", "C. 2^15", "D. 2^16"]}, {"id": 37, "type": "单选题", "points": 0.2, "question": "补码是一种有模运算，对于16位带符号的定点小数，若以补码表示则模等于(        )。", "answer": "B", "options": ["A. 1", "B. 2", "C. 2^15", "D. 2^16"]}, {"id": 38, "type": "单选题", "points": 0.2, "question": "假设[x]补=1.x1x2x3x4x5x6x7，若要使x＞-1/2成立，必须满足(        )。", "answer": "A", "options": ["A. x1为1，x2~x7至少有一个为1", "B. x1为1，x2~x7的值任意", "C. x1为0，x2~x7至少有一个为1", "D. x1为0，x2~x7的值任意"]}, {"id": 39, "type": "单选题", "points": 0.2, "question": "对于定点整数，同一真值的补码和移码(        )。", "answer": "B", "options": ["A. 符号位相同，尾数部分也完全相同", "B. 符号位不同，尾数部分完全相同", "C. 符号位相同，尾数部分不完全相同", "D. 符号位不同，尾数部分也不完全相同"]}, {"id": 40, "type": "单选题", "points": 0.2, "question": "原码、补码和反码这三种编码可用来表示(        )。", "answer": "B", "options": ["A. 无符号数", "B. 带符号数", "C. 字符", "D. 十进制数"]}, {"id": 41, "type": "单选题", "points": 0.2, "question": "在计算机中存储单元的地址采用(        )表示。", "answer": "A", "options": ["A. 无符号数", "B. 原码", "C. 补码", "D. 反码"]}, {"id": 42, "type": "单选题", "points": 0.2, "question": "(        )表示法主要用于表示浮点数中的阶码。", "answer": "D", "options": ["A. 原码", "B. 补码", "C. 反码", "D. 移码"]}, {"id": 43, "type": "单选题", "points": 0.2, "question": "规格化浮点数是指满足下列哪一个条件的浮点数?", "answer": "D", "options": ["A. 0≤|阶码|＜1/2", "B. 1/2≤|阶码|＜1", "C. 0≤|尾数|＜1/2", "D. 1/2≤|尾数|＜1"]}, {"id": 44, "type": "单选题", "points": 0.2, "question": "当浮点数的真值为正时，下列关于规格化浮点数的说法，哪一条是正确的?", "answer": "C", "options": ["A. 阶码的最高有效位为1", "B. 阶码的最高有效位为0", "C. 尾数的最高有效位为1", "D. 尾数的最高有效位为0"]}, {"id": 45, "type": "单选题", "points": 0.2, "question": "对于浮点数采用规格化表示的目的是(        )。", "answer": "D", "options": ["A. 扩大浮点数的表示范围", "B. 提高浮点数的表示精度", "C. 提高浮点数的运算速度", "D. 使浮点数的表示具有唯一性"]}, {"id": 46, "type": "单选题", "points": 0.2, "question": "在规格化浮点数表示法中尾数部分通常采用隐藏位，其目的是(        )。", "answer": "B", "options": ["A. 扩大浮点数的表示范围", "B. 提高浮点数的表示精度", "C. 提高浮点数的运算速度", "D. 避免浮点数运算发生溢出"]}, {"id": 47, "type": "单选题", "points": 0.2, "question": "浮点数的表示范围取决于(        )。", "answer": "B", "options": ["A. 阶码的编码", "B. 阶码的位数", "C. 尾数的编码", "D. 尾数的位数"]}, {"id": 48, "type": "单选题", "points": 0.2, "question": "浮点数的表示精度取决于(        )。", "answer": "D", "options": ["A. 阶码的编码", "B. 阶码的位数", "C. 尾数的编码", "D. 尾数的位数"]}, {"id": 49, "type": "单选题", "points": 0.2, "question": "某浮点数字长16位，其中阶码6位(含1位阶符)，补码表示，以2为底;尾数10位(含1位数符)，补码表示，规格化。则该浮点格式所能表示的非零最小正数是(        )。", "answer": "B", "options": ["A. 2^{-1}·2^{-31}", "B. 2^{-1}·2^{-32}", "C. 2^{-1}·2^{-63}", "D. 2^{-1}·2^{-64}"]}, {"id": 50, "type": "单选题", "points": 0.2, "question": "某浮点数字长16位，其中阶码6位(含1位阶符)，补码表示，以2为底;尾数10位(含1位数符)，补码表示，规格化。则该浮点格式所能表示的最大正数是(        )。", "answer": "A", "options": ["A. (1-2^{-9})·2^{31}", "B. (1-2^{-9})·2^{32}", "C. (1-2^{-9})·2^{63}", "D. (1-2^{-9})·2^{64}"]}, {"id": 51, "type": "单选题", "points": 0.2, "question": "某浮点数字长16位，其中阶码6位(含1位阶符)，补码表示，以2为底;尾数10位(含1位数符)，补码表示，规格化。则该浮点格式所能表示的绝对值最小负数是(        )。", "answer": "C", "options": ["A. (-2^{-1}-2^{-9})·2^{-31}", "B. (-2^{-1}+2^{-9})·2^{-31}", "C. (-2^{-1}-2^{-9})·2^{-32}", "D. (-2^{-1}+2^{-9})·2^{-32}"]}, {"id": 52, "type": "单选题", "points": 0.2, "question": "某浮点数字长16位，其中阶码6位(含1位阶符)，补码表示，以2为底;尾数10位(含1位数符)，补码表示，规格化。则该浮点格式所能表示的绝对值最大负数是(        )。", "answer": "A", "options": ["A. (-1)·2^{31}", "B. (-1+2^{-9})·2^{31}", "C. (-1)·2^{32}", "D. (-1+2^{-9})·2^{32}"]}, {"id": 53, "type": "单选题", "points": 0.2, "question": "IEEE754标准规定了浮点数的三种格式，在这三种格式中阶码都采用(        )表示。", "answer": "D", "options": ["A. 原码", "B. 补码", "C. 反码", "D. 移码"]}, {"id": 54, "type": "单选题", "points": 0.2, "question": "在IEEE754标准规定的短浮点数格式中，阶码的偏移量是(        )。", "answer": "A", "options": ["A. 127", "B. 128", "C. 255", "D. 256"]}, {"id": 55, "type": "单选题", "points": 0.2, "question": "当定点数和浮点数字长相同时，以下关于定点数和浮点数的叙述，哪一个是错误的?", "answer": "C", "options": ["A. 浮点数的表示范围比定点数宽", "B. 浮点数的表示精度比定点数高", "C. 浮点数的运算速度比定点数快", "D. 浮点数的运算过程比定点数复杂"]}, {"id": 56, "type": "单选题", "points": 0.2, "question": "以下关于奇偶校验码的说法，哪一个是正确的?", "answer": "A", "options": ["A. 奇偶校验码能发现奇数个错误，但不能纠错。", "B. 奇偶校验码能发现奇数个错误，且能够纠错。", "C. 奇偶校验码能发现偶数个错误，但不能纠错。", "D. 奇偶校验码能发现偶数个错误，且能够纠错。"]}, {"id": 57, "type": "单选题", "points": 0.2, "question": "某主存储器采用偶校验，每个字节配一个校验位，那么下列哪一组代码是正确的码字?", "answer": "A", "options": ["A. 1011000102", "B. 1100101012", "C. 1110000112", "D. 1000010102"]}, {"id": 58, "type": "单选题", "points": 0.2, "question": "若数据信息位是8位，采用海明校验编码，则至少要安排(        )个校验位。", "answer": "B", "options": ["A. 3", "B. 4", "C. 5", "D. 6"]}, {"id": 59, "type": "单选题", "points": 0.2, "question": "海明校验码的检错和纠错能力为(        )。", "answer": "B", "options": ["A. 可以发现奇数个错误，但不能纠错", "B. 可以发现并纠正1位错误", "C. 可以发现并纠正2位错误", "D. 可以发现并纠正3位错误"]}, {"id": 60, "type": "单选题", "points": 0.2, "question": "若循环校验码数据信息的位数为k，校验位的位数为r，那么其生成多项式的位数为(        )。", "answer": "B", "options": ["A. r-1", "B. r+1", "C. k+r-1", "D. k+r+1"]}, {"id": 61, "type": "单选题", "points": 0.2, "question": "将4位数据信息1110_2编成循环校验码，选择生成多项式G(x)=1011_2，则产生的校验位R(x)为(        )。", "answer": "C", "options": ["A. 010_2", "B. 001_2", "C. 100_2", "D. 101_2"]}, {"id": 62, "type": "单选题", "points": 0.2, "question": "某磁表面存储器采用循环码校验，给定的生成多项式是G(x)=1011_2，下面哪一个校验码是正确的码字?", "answer": "D", "options": ["A. 0100010_2", "B. 1100110_2", "C. 1100011_2", "D. 1100010_2"]}, {"id": 63, "type": "单选题", "points": 0.2, "question": "下面哪一种编码可使符号位与尾数部分一起参与加减法运算?", "answer": "B", "options": ["A. 原码", "B. 补码", "C. 反码", "D. 移码"]}, {"id": 64, "type": "单选题", "points": 0.2, "question": "根据[X]补求[-X]补的方法是(        )。", "answer": "B", "options": ["A. 符号位不变，尾数按位变反，最低位加1", "B. 符号位与尾数一起按位变反，最低位加1", "C. 符号位置0，尾数按位变反，最低位加1", "D. 符号位置1，尾数按位变反，最低位加1"]}, {"id": 65, "type": "单选题", "points": 0.2, "question": "在补码加减法运算中，求[X-Y]补相当于求(        )。", "answer": "B", "options": ["A. [X]补+[Y]补", "B. [X]补+[-Y]补", "C. [-X]补+[Y]补", "D. [-X]补+[-Y]补"]}, {"id": 66, "type": "单选题", "points": 0.2, "question": "在补码加减法运算中，以下哪一种情况有可能产生溢出?", "answer": "B", "options": ["A. 一个正数加一个负数", "B. 两个负数相加", "C. 两个正数相减", "D. 两个负数相减"]}, {"id": 67, "type": "单选题", "points": 0.2, "question": "下列哪一种移位方式在移位前后必须保证操作数的符号位不发生改变?", "answer": "A", "options": ["A. 算术移位", "B. 逻辑移位", "C. 小循环移位", "D. 大循环移位"]}, {"id": 68, "type": "单选题", "points": 0.2, "question": "正数在进行算术移位时，符号位不变，左移最低位补0，右移最高有效位补0。那么以下对负数算术移位规则的描述，哪一条是正确的?", "answer": "A", "options": ["A. 以原码表示的负数其移位规则与正数完全相同", "B. 以补码表示的负数其移位规则与正数完全相同", "C. 以反码表示的负数其移位规则与正数完全相同", "D. 以上三种编码表示的负数其移位规则与正数均不相同"]}, {"id": 69, "type": "单选题", "points": 0.2, "question": "下列哪一种运算绝对不可能产生溢出?", "answer": "B", "options": ["A. 定点小数加法运算", "B. 定点小数乘法运算", "C. 浮点数加法运算", "D. 浮点数乘法运算"]}, {"id": 70, "type": "单选题", "points": 0.2, "question": "在原码一位乘法中，乘积的符号位Mf由被乘数的符号位Xf和乘数的符号位Yf决定，它们之间的关系是(        )。", "answer": "D", "options": ["A. Mf=Xf∧Yf(逻辑与)", "B. Mf=Xf∨Yf(逻辑或)", "C. Mf=Xf∧Yf(与非)", "D. Mf=Xf⊕Yf(异或)"]}, {"id": 71, "type": "单选题", "points": 0.2, "question": "在补码一位乘法中，X是被乘数，Y是乘数。若乘数最末位Yn和Yn+1的值分别为0和1，那么下一步执行的操作应该是(        )。", "answer": "C", "options": ["A. 原部分积加[X]补后再左移一位", "B. 原部分积加[-X]补后再左移一位", "C. 原部分积加[X]补后再右移一位", "D. 原部分积加[-X]补后再右移一位"]}, {"id": 72, "type": "单选题", "points": 0.2, "question": "原码恢复余数除法在实际机器中很少采用，其原因是(        )。", "answer": "C", "options": ["A. 符号位需要单独处理，影响了运算速度", "B. 需要对商进行校正，影响了运算速度", "C. 操作步数不统一，控制复杂，影响了运算速度", "D. 需要设置附加位，增加了硬件代价"]}, {"id": 73, "type": "单选题", "points": 0.2, "question": "在原码不恢复余数除法中，X是被除数，Y是除数。若第i步的部分余数ri≥0，则上商(        )，下一步执行操作(        )。", "answer": "B", "options": ["A. Qi=1、ri+1=2ri+Y", "B. Qi=1、ri+1=2ri-Y", "C. Qi=0、ri+1=2ri+Y", "D. Qi=0、ri+1=2ri-Y"]}, {"id": 74, "type": "单选题", "points": 0.2, "question": "在原码不恢复余数除法中，以下关于余数符号的说法哪一条是正确的?", "answer": "C", "options": ["A. 余数的符号总是为正", "B. 余数的符号总是为负", "C. 余数的符号总是与被除数的符号相同", "D. 余数的符号总是与除数的符号相同"]}, {"id": 75, "type": "单选题", "points": 0.2, "question": "在补码不恢复余数除法中，X是被除数，Y是除数。若第i步的部分余数[ri]补与[Y]补同号，则上商(        )，下一步执行操作(        )。", "answer": "B", "options": ["A. Qi=1、[ri+1]补=2[ri]补+[Y]补", "B. Qi=1、[ri+1]补=2[ri]补+[-Y]补", "C. Qi=0、[ri+1]补=2[ri]补+[Y]补", "D. Qi=0、[ri+1]补=2[ri]补+[-Y]补"]}, {"id": 76, "type": "单选题", "points": 0.2, "question": "在补码不恢复余数除法中，如果对商的精度没有特殊要求，一般采取的舍入方法是(        )。", "answer": "C", "options": ["A. 截断法", "B. 0舍1入法", "C. 末位恒置1", "D. 末位恒置0"]}, {"id": 77, "type": "单选题", "points": 0.2, "question": "浮点数在作加减法运算前，需要对阶，原则是小的阶码向大的阶码对齐。如果阶码以2为底，则每当阶码加1时尾数应该(        )。", "answer": "B", "options": ["A. 左移1位", "B. 右移1位", "C. 最低位加1", "D. 最低位减1"]}, {"id": 78, "type": "单选题", "points": 0.2, "question": "在进行浮点数加减法运算的过程中，以下哪一个步骤有可能导致运算结果发生溢出?", "answer": "C", "options": ["A. 对阶", "B. 尾数加减", "C. 规格化", "D. 舍入"]}, {"id": 79, "type": "单选题", "points": 0.2, "question": "在浮点数加减法运算中，下列哪一种情况需要对尾数运算的结果进行右规格化?", "answer": "C", "options": ["A. 尾数加减时运算结果为正", "B. 尾数加减时运算结果为负", "C. 尾数加减时发生溢出", "D. 尾数加减时最高位产生进位"]}, {"id": 80, "type": "单选题", "points": 0.2, "question": "在浮点数加减法运算中，若浮点数的阶码和尾数均以补码表示，下列哪一种情况需要对尾数运算的结果进行左规格化?", "answer": "A", "options": ["A. 运算结果未发生溢出且其符号位和最高有效位相同", "B. 运算结果未发生溢出且其符号位和最高有效位不同", "C. 运算结果发生溢出且其符号位和最高有效位相同", "D. 运算结果发生溢出且其符号位和最高有效位不同"]}, {"id": 81, "type": "单选题", "points": 0.2, "question": "两个浮点数在相乘前，需要进行阶码相加。如果阶码用移码表示，相加之后必须作修正，修正的方法是(        )。", "answer": "D", "options": ["A. 使阶码相加以后的结果左移1位", "B. 使阶码相加以后的结果右移1位", "C. 使阶码相加以后的结果再加阶符的位权2^n", "D. 使阶码相加以后的结果再减阶符的位权2^n"]}, {"id": 82, "type": "单选题", "points": 0.2, "question": "两个浮点数在相除前，有时需要进行尾数调整，其目的是(        )。", "answer": "C", "options": ["A. 使被除数的尾数满足规格化的要求", "B. 使除数的尾数满足规格化的要求", "C. 使被除数尾数的绝对值小于除数尾数的绝对值", "D. 避免在阶码相减时产生溢出"]}, {"id": 83, "type": "单选题", "points": 0.2, "question": "浮点数的下溢并不表示真正溢出，当出现下溢时一般把结果作为(        )处理。", "answer": "C", "options": ["A. 最小正数", "B. 最小负数", "C. 机器零", "D. 运算错误"]}, {"id": 84, "type": "单选题", "points": 0.2, "question": "为了提高全加器的运算速度，应采用下面哪一种进位链结构?", "answer": "D", "options": ["A. 串行进位", "B. 正负交替逻辑进位", "C. 组内并行、组间串行进位", "D. 组内并行、组间并行进位"]}, {"id": 85, "type": "单选题", "points": 0.2, "question": "某加法单元的两个加数分别是Ai和Bi，那么该加法单元进位产生函数Gi的逻辑表达式为(        )。", "answer": "A", "options": ["A. Gi=Ai∧Bi(逻辑与)", "B. Gi=Ai∧Bi(与非)", "C. Gi=Ai∨Bi(逻辑或)", "D. Gi=Ai⊕Bi(异或)"]}, {"id": 86, "type": "单选题", "points": 0.2, "question": "某加法单元的两个加数分别是Ai和Bi，那么该加法单元进位传递函数Pi的逻辑表达式为(        )。", "answer": "D", "options": ["A. Pi=Ai∧Bi(逻辑与)", "B. Pi=Ai∧Bi(与非)", "C. Pi=Ai∨Bi(或非)", "D. Pi=Ai⊕Bi(异或)"]}, {"id": 87, "type": "单选题", "points": 0.2, "question": "一台计算机所能执行的全部指令的集合称为该计算机的指令系统，此处指令的含义是(        )。", "answer": "C", "options": ["A. 宏指令", "B. 汇编指令", "C. 机器指令", "D. 微指令"]}, {"id": 88, "type": "单选题", "points": 0.2, "question": "指令格式中操作码字段的作用是(        )。", "answer": "A", "options": ["A. 指明本条指令完成什么样的操作", "B. 指明操作数保存在何处", "C. 指明下一条指令的地址", "D. 指明操作数是何种数据类型"]}, {"id": 89, "type": "单选题", "points": 0.2, "question": "若在指令系统中采用扩展操作码，必须遵循的一个原则是(        )。", "answer": "D", "options": ["A. 指令的总长度必须固定", "B. 地址码的个数必须固定", "C. 地址码的内容不能与操作码的内容相同", "D. 短的操作码不能是长的操作码的前缀"]}, {"id": 90, "type": "单选题", "points": 0.2, "question": "在指令格式中地址码的个数由(        )决定。", "answer": "A", "options": ["A. 操作码", "B. 操作数寻址方式", "C. 指令长度", "D. 寄存器号"]}, {"id": 91, "type": "单选题", "points": 0.2, "question": "四地址指令的主要缺陷是(        )。", "answer": "C", "options": ["A. 不易确定下一条指令的地址", "B. 指令本身包含的信息不够丰富", "C. 指令字长太长，浪费存储空间", "D. 增加了指令译码的难度"]}, {"id": 92, "type": "单选题", "points": 0.2, "question": "零地址指令虽然没有地址码，但并不表示它不需要操作数，其操作数一般隐含在(        )中。", "answer": "B", "options": ["A. 通用寄存器", "B. 累加器", "C. 程序计数器", "D. 指令寄存器"]}, {"id": 93, "type": "单选题", "points": 0.2, "question": "下列哪一种格式的指令有利于缩短程序长度、方便用户使用并且能提高操作并行度?", "answer": "A", "options": ["A. 三地址指令", "B. 二地址指令", "C. 一地址指令", "D. 零地址指令"]}, {"id": 94, "type": "单选题", "points": 0.2, "question": "下列哪一种格式的指令有利于缩短指令长度、减少CPU访存次数以及简化硬件电路设计?", "answer": "C", "options": ["A. 三地址指令", "B. 二地址指令", "C. 一地址指令", "D. 零地址指令"]}, {"id": 95, "type": "单选题", "points": 0.2, "question": "指令系统采用不同寻址方式的主要目的是(        )。", "answer": "B", "options": ["A. 减少CPU访存次数，提高指令执行速度", "B. 缩短指令长度，扩大寻址空间，提高编程灵活性", "C. 简化指令译码器的逻辑结构，缩短指令的译码时间", "D. 为指令系统在功能上进一步扩充提供方便"]}, {"id": 96, "type": "单选题", "points": 0.2, "question": "为了适应非数值应用的需要，目前最普遍采用的编址方式是(        )。", "answer": "B", "options": ["A. 位编址", "B. 字节编址", "C. 字编址", "D. 双字编址"]}, {"id": 97, "type": "单选题", "points": 0.2, "question": "如果操作数位于指令中，紧跟在操作码和寻址方式字段之后，那么该操作数的寻址方式属于(        )。", "answer": "A", "options": ["A. 立即寻址", "B. 直接寻址", "C. 变址寻址", "D. 相对寻址"]}, {"id": 98, "type": "单选题", "points": 0.2, "question": "如果操作数的有效地址位于指令中，紧跟在操作码和寻址方式字段之后，那么该操作数的寻址方式属于(        )。", "answer": "B", "options": ["A. 立即寻址", "B. 直接寻址", "C. 变址寻址", "D. 相对寻址"]}, {"id": 99, "type": "单选题", "points": 0.2, "question": "寄存器直接寻址的两个最明显的优点是(        )。", "answer": "C", "options": ["A. 指令执行速度快，编程灵活", "B. 指令长度短，指令系统易扩充", "C. 指令长度短，指令执行速度快", "D. 编程灵活，指令系统易扩充"]}, {"id": 100, "type": "单选题", "points": 0.2, "question": "变址寻址为(        )提供了支持。", "answer": "C", "options": ["A. 程序的动态再定位", "B. 访存地址的越界检查", "C. 向量和数组运算", "D. 操作系统的进程调度"]}, {"id": 101, "type": "单选题", "points": 0.2, "question": "相对寻址方式是以程序计数器PC作为基址寄存器，指令中给出位移量，二者之和为操作数有效地址。这种寻址方式通常用于(        )中。", "answer": "C", "options": ["A. 双操作数指令", "B. 单操作数指令", "C. 转移指令", "D. 软中断指令"]}, {"id": 102, "type": "单选题", "points": 0.2, "question": "在设计指令系统时要求在一个有限的存储空间内，对于任何可解的问题都可以用其中的指令编程实现，这体现了指令系统的(        )。", "answer": "A", "options": ["A. 完备性", "B. 有效性", "C. 规整性", "D. 兼容性"]}, {"id": 103, "type": "单选题", "points": 0.2, "question": "在设计指令系统时要求用所提供的指令编写的程序执行速度快，占用存储空间小，这体现了指令系统的(        )。", "answer": "B", "options": ["A. 完备性", "B. 有效性", "C. 规整性", "D. 兼容性"]}, {"id": 104, "type": "单选题", "points": 0.2, "question": "在设计指令系统时要求系列机的各种机型应该具有基本相同的指令集，至少先推出的机器上的程序可以在后推出的机器上运行，这体现了指令系统的(        )。", "answer": "D", "options": ["A. 完备性", "B. 有效性", "C. 规整性", "D. 兼容性"]}, {"id": 105, "type": "单选题", "points": 0.2, "question": "按照(        )来分类，可把指令划分成数据传送类指令、运算类指令、程序控制类指令、输入/输出指令、处理机控制和调试指令等类型。", "answer": "C", "options": ["A. 指令的地址格式", "B. 指令的使用范围", "C. 指令的功能", "D. 操作数所在位置"]}, {"id": 106, "type": "单选题", "points": 0.2, "question": "按照(        )来分类，可把指令划分成R-R型、R-S型和S-S型三种类型。", "answer": "D", "options": ["A. 指令的地址格式", "B. 指令的使用范围", "C. 指令的功能", "D. 操作数所在位置"]}, {"id": 107, "type": "单选题", "points": 0.2, "question": "入栈和出栈指令从本质上讲属于(        )。", "answer": "A", "options": ["A. 数据传送类指令", "B. 算术运算指令", "C. 逻辑运算指令", "D. 程序控制类指令"]}, {"id": 108, "type": "单选题", "points": 0.2, "question": "程序控制类指令的功能是(        )。", "answer": "D", "options": ["A. 进行算术运算和逻辑运算", "B. 在CPU和主存之间进行数据传送", "C. 在CPU和I/O设备之间进行数据传送", "D. 改变程序的执行顺序"]}, {"id": 109, "type": "单选题", "points": 0.2, "question": "转子指令在转向子程序之前需要保护返回地址，这里的返回地址是指(        )。", "answer": "D", "options": ["A. 子程序第一条指令的地址", "B. 子程序最后一条指令的地址", "C. 转子指令所在存储单元的地址", "D. 转子指令的下一条指令所在存储单元的地址"]}, {"id": 110, "type": "单选题", "points": 0.2, "question": "转子指令在转向子程序之前需要把返回地址放入(        )中进行保护。", "answer": "D", "options": ["A. 指令寄存器IR", "B. 程序计数器PC", "C. 程序状态字寄存器PSW", "D. 堆栈"]}, {"id": 111, "type": "单选题", "points": 0.2, "question": "与CISC计算机相比，RISC计算机的主要缺陷在于(        )。", "answer": "C", "options": ["A. 运算速度慢", "B. 设计周期长，成本高，可靠性差", "C. 无法实现指令系统的向前兼容", "D. 对高级语言的支持能力不强"]}, {"id": 112, "type": "单选题", "points": 0.2, "question": "在RISC处理机中，为了使调用和返回指令尽可能少地访问主存储器，采取的主要措施是使用(        )。", "answer": "C", "options": ["A. 延迟转移技术", "B. 指令取消技术", "C. 重叠寄存器窗口技术", "D. 指令流调整技术"]}, {"id": 113, "type": "单选题", "points": 0.2, "question": "RISC计算机为了提高运算速度，采取的主要措施是(        )。", "answer": "B", "options": ["A. 减少所需执行的总的指令条数", "B. 减少每条指令执行的平均周期数", "C. 减少每个机器周期的时间宽度", "D. 减少子程序调用指令和返回指令的数目"]}, {"id": 114, "type": "单选题", "points": 0.2, "question": "在RISC指令系统中，只有(        )指令可以访问主存储器。", "answer": "A", "options": ["A. Load/Store", "B. 算术逻辑运算", "C. 控制转移", "D. 子程序调用和返回"]}, {"id": 115, "type": "单选题", "points": 0.2, "question": "下列各种处理器中属于RISC处理器的是(        )。", "answer": "C", "options": ["A. IBM370/168", "B. VAX11/780", "C. UltraSPARC", "D. PentiumⅣ"]}, {"id": 116, "type": "单选题", "points": 0.2, "question": "同步控制的时序系统中最基本的时间分段是(        )。", "answer": "D", "options": ["A. 指令周期", "B. 机器周期", "C. 工作周期", "D. 时钟周期"]}, {"id": 117, "type": "单选题", "points": 0.2, "question": "一条指令的执行过程可以划分成若干个阶段，每个阶段持续的时间被称为(        )。", "answer": "B", "options": ["A. 指令周期", "B. 机器周期", "C. 时钟周期", "D. 微周期"]}, {"id": 118, "type": "单选题", "points": 0.2, "question": "CPU取出并执行一条指令所需的全部时间被称为(        )。", "answer": "A", "options": ["A. 指令周期", "B. 机器周期", "C. 工作周期", "D. 时钟周期"]}, {"id": 119, "type": "单选题", "points": 0.2, "question": "在组合逻辑控制器中，CPU执行各种指令所需要的控制信号均来自(        )。", "answer": "C", "options": ["A. 指令译码器", "B. 程序状态字寄存器", "C. 微操作信号发生器", "D. 节拍发生器"]}, {"id": 120, "type": "单选题", "points": 0.2, "question": "在取指周期，CPU把要执行的指令从(        )取出，送入指令寄存器IR中，同时修改程序计数器PC的值。", "answer": "B", "options": ["A. 控制存储器", "B. 主存储器", "C. 磁盘存储器", "D. 累加器"]}, {"id": 121, "type": "单选题", "points": 0.2, "question": "在控制器中，用于存放当前程序的工作方式、优先级以及由运算类指令产生的条件码的部件是(        )。", "answer": "D", "options": ["A. 程序计数器", "B. 指令寄存器", "C. 指令译码器", "D. 程序状态字寄存器"]}, {"id": 122, "type": "单选题", "points": 0.2, "question": "下列哪一个寄存器用于保存CPU要执行的下一条指令的地址?", "answer": "B", "options": ["A. 主存地址寄存器", "B. 程序计数器", "C. 变址寄存器", "D. 微地址寄存器"]}, {"id": 123, "type": "单选题", "points": 0.2, "question": "指令译码器的输入信号来自于(        )。", "answer": "B", "options": ["A. 程序计数器", "B. 指令寄存器", "C. 程序状态字寄存器", "D. 微操作信号发生器"]}, {"id": 124, "type": "单选题", "points": 0.2, "question": "组合逻辑控制器最主要的优点是(        )。", "answer": "A", "options": ["A. 工作速度快", "B. 结构简单、规整", "C. 易于修改和扩充", "D. 易于诊断和维护"]}, {"id": 125, "type": "单选题", "points": 0.2, "question": "构成控制信号序列的最小单位是(        )。", "answer": "C", "options": ["A. 微程序", "B. 微指令", "C. 微命令", "D. 微操作"]}, {"id": 126, "type": "单选题", "points": 0.2, "question": "在微程序控制器中，从控制存储器读取一条微指令并执行相应微操作所需的时间称为微周期，微周期是最基本的时序信号，通常一个微周期等于一个(        )。", "answer": "D", "options": ["A. 指令周期", "B. 机器周期", "C. 工作周期", "D. 时钟周期"]}, {"id": 127, "type": "单选题", "points": 0.2, "question": "在微程序控制器中，机器指令与微指令的关系是(        )。", "answer": "B", "options": ["A. 每一条机器指令由一条微指令解释执行", "B. 每一条机器指令由若干条微指令解释执行", "C. 每一条微指令由一条机器指令解释执行", "D. 每一条微指令由若干条机器指令解释执行"]}, {"id": 128, "type": "单选题", "points": 0.2, "question": "在微程序控制方式中，当一条机器指令被取出并送入指令寄存器IR后，根据(        )形成该机器指令所对应的微程序入口地址。", "answer": "A", "options": ["A. 机器指令操作码", "B. 程序计数器PC", "C. 源操作数寻址方式", "D. 目的操作数寻址方式"]}, {"id": 129, "type": "单选题", "points": 0.2, "question": "在微程序控制器中，用于向CPU内部以及系统总线提供各种控制信号的部件是(        )。", "answer": "D", "options": ["A. 微地址形成部件", "B. 微操作信号发生器", "C. 微地址寄存器", "D. 微指令寄存器"]}, {"id": 130, "type": "单选题", "points": 0.2, "question": "在微程序控制逻辑中，一条机器指令可由一小段微程序解释执行，微程序保存在(        )中。", "answer": "D", "options": ["A. 高速缓存", "B. 主存储器", "C. 磁盘存储器", "D. 控制存储器"]}, {"id": 131, "type": "单选题", "points": 0.2, "question": "在微指令格式中顺序控制字段的作用是(        )。", "answer": "B", "options": ["A. 直接或通过译码产生各种微命令", "B. 提供形成后继微指令地址的方法", "C. 提供当前机器指令的操作码", "D. 提供下一条机器指令的地址"]}, {"id": 132, "type": "单选题", "points": 0.2, "question": "在微指令的各种编码方式中，如果一个字段的某些微命令需要由另一个字段中的某些微命令加以解释，则这种编码方式称为(        )方式。", "answer": "C", "options": ["A. 直接控制", "B. 字段直接编码", "C. 字段间接编码", "D. 最短编码"]}, {"id": 133, "type": "单选题", "points": 0.2, "question": "在微指令的各种编码方式中，如果用一个二进制位代表一个微命令，直接作用于对应的功能部件上，中间不需要设置译码电路，则这种编码方式称为(        )方式。", "answer": "A", "options": ["A. 直接控制", "B. 字段直接编码", "C. 字段间接编码", "D. 最短编码"]}, {"id": 134, "type": "单选题", "points": 0.2, "question": "在采用断定方式的微指令中，后继微地址中的非因变分量通常由设计者直接指定，并且位于(        )中。", "answer": "C", "options": ["A. 微地址寄存器", "B. 程序计数器", "C. 微指令寄存器", "D. 指令寄存器"]}, {"id": 135, "type": "单选题", "points": 0.2, "question": "动态微程序设计技术的主要思想是通过改变微指令和微程序从而改变机器的(        )。", "answer": "D", "options": ["A. 控制方式", "B. 运算速度", "C. 存储容量", "D. 指令系统"]}, {"id": 136, "type": "单选题", "points": 0.2, "question": "微程序控制方式的主要缺点是(        )。", "answer": "C", "options": ["A. 结构复杂，不规整，设计效率低，不利于检查调试", "B. 指令系统不易修改和扩充", "C. 执行速度慢，不能充分发挥CPU本身具有的并行处理能力", "D. 可靠性较差，不利于诊断和维护"]}, {"id": 137, "type": "单选题", "points": 0.2, "question": "影响指令流水线性能的主要因素是(        )。", "answer": "C", "options": ["A. 指令种类多", "B. 寻址方式多", "C. 访存冲突", "D. 软硬件功能分配不合理"]}, {"id": 138, "type": "单选题", "points": 0.2, "question": "在流水线工作方式中，如果第k+1条指令所需的操作数是第k条指令的运算结果，那么这种数据相关属于(        )。", "answer": "B", "options": ["A. RAR相关", "B. RAW相关", "C. WAR相关", "D. WAW相关"]}, {"id": 139, "type": "单选题", "points": 0.2, "question": "(        )是衡量存储器性能好坏的三个重要指标。", "answer": "B", "options": ["A. 容量、速度和功耗", "B. 容量、速度和价格", "C. 容量、功耗和价格", "D. 速度、功耗和价格"]}, {"id": 140, "type": "单选题", "points": 0.2, "question": "计算机的三级存储体系结构由(        )构成。", "answer": "C", "options": ["A. Cache、控制存储器和主存储器", "B. Cache、控制存储器和辅助存储器", "C. Cache、主存储器和辅助存储器", "D. 控制存储器、主存储器和辅助存储器"]}, {"id": 141, "type": "单选题", "points": 0.2, "question": "在三级存储体系结构中，三种存储器的工作速度从高到低的排列次序是(        )。", "answer": "A", "options": ["A. 高速缓存、主存、辅存", "B. 辅存、主存、高速缓存", "C. 主存、高速缓存、辅存", "D. 辅存、高速缓存、主存"]}, {"id": 142, "type": "单选题", "points": 0.2, "question": "在三级存储体系结构中，三种存储器的存储容量从大到小的排列次序是(        )。", "answer": "B", "options": ["A. 高速缓存、主存、辅存", "B. 辅存、主存、高速缓存", "C. 主存、高速缓存、辅存", "D. 辅存、高速缓存、主存"]}, {"id": 143, "type": "单选题", "points": 0.2, "question": "在三级存储体系结构中，三种存储器的每位平均价格从高到低的排列次序是(        )。", "answer": "A", "options": ["A. 高速缓存、主存、辅存", "B. 辅存、主存、高速缓存", "C. 主存、高速缓存、辅存", "D. 辅存、高速缓存、主存"]}, {"id": 144, "type": "单选题", "points": 0.2, "question": "按存取方式进行分类，磁盘存储器属于(        )。", "answer": "D", "options": ["A. 随机存储器", "B. 只读存储器", "C. 顺序存取存储器", "D. 直接存取存储器"]}, {"id": 145, "type": "单选题", "points": 0.2, "question": "按存储介质进行分类，现代计算机的主存储器属于(        )。", "answer": "B", "options": ["A. 磁芯存储器", "B. 半导体存储器", "C. 磁表面存储器", "D. 光学存储器"]}, {"id": 146, "type": "单选题", "points": 0.2, "question": "按存储介质进行分类，高速缓存Cache属于(        )。", "answer": "B", "options": ["A. 磁芯存储器", "B. 半导体存储器", "C. 磁表面存储器", "D. 光学存储器"]}, {"id": 147, "type": "单选题", "points": 0.2, "question": "在下列各种存储器中，断电后其保存信息全部丢失的是(        )。", "answer": "A", "options": ["A. 随机存储器", "B. 只读存储器", "C. 硬盘存储器", "D. 光盘存储器"]}, {"id": 148, "type": "单选题", "points": 0.2, "question": "对于大多数计算机系统，静态RAM一般用于构成(        )。", "answer": "A", "options": ["A. 高速缓冲存储器", "B. 主存储器", "C. 辅助存储器", "D. 控制存储器"]}, {"id": 149, "type": "单选题", "points": 0.2, "question": "对于大多数计算机系统，动态RAM一般用于构成(        )。", "answer": "B", "options": ["A. 高速缓冲存储器", "B. 主存储器", "C. 辅助存储器", "D. 控制存储器"]}, {"id": 150, "type": "单选题", "points": 0.2, "question": "在存储器芯片中，地址译码采用行列译码的方式是为了(        )。", "answer": "D", "options": ["A. 扩大寻址范围", "B. 提高访存速度", "C. 增加存储器的容量", "D. 减少地址线的数量"]}, {"id": 151, "type": "单选题", "points": 0.2, "question": "在CPU和主存储器之间设置高速缓存的主要目的是(        )。", "answer": "A", "options": ["A. 使CPU与主存储器的工作速度匹配", "B. 扩大整个存储系统的存储容量", "C. 降低整个存储系统的每位价格", "D. 提高存储系统工作的可靠性"]}, {"id": 152, "type": "单选题", "points": 0.2, "question": "在动态RAM的各种刷新方式中，下面哪一种刷新方式存在访存的“死区”?", "answer": "A", "options": ["A. 集中刷新", "B. 分散刷新", "C. 异步刷新", "D. 按行刷新"]}, {"id": 153, "type": "单选题", "points": 0.2, "question": "下列哪一种存储器芯片需要定期进行刷新?", "answer": "B", "options": ["A. SRAM", "B. DRAM", "C. EPROM", "D. E2PROM"]}, {"id": 154, "type": "单选题", "points": 0.2, "question": "Intel2114(1K×4位)是一种小容量的SRAM芯片，若以字节数表示，一片2114的存储容量是(        )。", "answer": "B", "options": ["A. 256B", "B. 512B", "C. 1024B", "D. 2048B"]}, {"id": 155, "type": "单选题", "points": 0.2, "question": "EPROM属于下列哪一种只读存储器?", "answer": "C", "options": ["A. 掩模型只读存储器，只能读出，不能写入", "B. 可一次编程的只读存储器", "C. 紫外线擦除的可重编程只读存储器", "D. 电擦除的可重编程只读存储器"]}, {"id": 156, "type": "单选题", "points": 0.2, "question": "E2PROM属于下列哪一种只读存储器?", "answer": "D", "options": ["A. 掩模型只读存储器，只能读出，不能写入", "B. 可一次编程的只读存储器", "C. 紫外线擦除的可重编程只读存储器", "D. 电擦除的可重编程只读存储器"]}, {"id": 157, "type": "单选题", "points": 0.2, "question": "一般的存储器芯片都具有片选信号和写使能信号这两个控制端，若对这样的存储器芯片执行读操作，则必须满足(        )。", "answer": "B", "options": ["A. =0，=0", "B. =0，=1", "C. =1，=0", "D. =1，=1"]}, {"id": 158, "type": "单选题", "points": 0.2, "question": "某静态RAM芯片的规格为16M×8位，该芯片地址线和数据线的总和为(        )条。", "answer": "C", "options": ["A. 24", "B. 27", "C. 32", "D. 128"]}, {"id": 159, "type": "单选题", "points": 0.2, "question": "在存储器与CPU连接时，通常把CPU地址线的低位部分与各存储器芯片的地址线直接相连，而CPU地址线的高位部分经过译码电路产生(        )。", "answer": "C", "options": ["A. 读控制信号", "B. 写控制信号", "C. 片选信号", "D. 刷新信号"]}, {"id": 160, "type": "单选题", "points": 0.2, "question": "使用若干规格相同的存储器芯片构成主存储器，假设每个芯片有SA条地址线和SD条数据线，整个存储器有MA条地址线和MD条数据线，那么下列哪一种情况应采用位扩展连接方式?", "answer": "C", "options": ["A. SA=MA，SD=MD", "B. SA＜MA，SD＜MD", "C. SA=MA，SD＜MD", "D. SA＜MA，SD=MD"]}, {"id": 161, "type": "单选题", "points": 0.2, "question": "使用若干规格相同的存储器芯片构成主存储器，假设每个芯片有SA条地址线和SD条数据线，整个存储器有MA条地址线和MD条数据线，那么下列哪一种情况应采用字扩展连接方式?", "answer": "D", "options": ["A. SA=MA，SD=MD", "B. SA＜MA，SD＜MD", "C. SA=MA，SD＜MD", "D. SA＜MA，SD=MD"]}, {"id": 162, "type": "单选题", "points": 0.2, "question": "如果主存中的字块可以放入Cache中的任何位置，那么这种映像方式属于(        )。", "answer": "B", "options": ["A. 直接映像", "B. 全相联映像", "C. 组相联映像", "D. 段相联映像"]}, {"id": 163, "type": "单选题", "points": 0.2, "question": "如果主存中的字块可以放入Cache中的唯一位置，那么这种映像方式属于(        )。", "answer": "A", "options": ["A. 直接映像", "B. 全相联映像", "C. 组相联映像", "D. 段相联映像"]}, {"id": 164, "type": "单选题", "points": 0.2, "question": "在下列四种Cache-主存地址映像方式中，哪一种方式可获得最高的Cache命中率?", "answer": "B", "options": ["A. 直接映像", "B. 全相联映像", "C. 组相联映像", "D. 段相联映像"]}, {"id": 165, "type": "单选题", "points": 0.2, "question": "在下列四种Cache-主存地址映像方式中，哪一种方式的地址变换速度最快?", "answer": "A", "options": ["A. 直接映像", "B. 全相联映像", "C. 组相联映像", "D. 段相联映像"]}, {"id": 166, "type": "单选题", "points": 0.2, "question": "在下列四种Cache-主存地址映像方式中，不需要替换算法的是(        )。", "answer": "A", "options": ["A. 直接映像", "B. 全相联映像", "C. 组相联映像", "D. 段相联映像"]}, {"id": 167, "type": "单选题", "points": 0.2, "question": "在组相联映像方式中，如果Cache被分成32个组，每组4个字块，主存共有4096个字块，那么在主存地址中主存字块标记有(        )位。", "answer": "A", "options": ["A. 7", "B. 8", "C. 9", "D. 12"]}, {"id": 168, "type": "单选题", "points": 0.2, "question": "在Cache更新策略中，当Cache命中时把数据同时写入Cache和主存的策略是(        )。", "answer": "A", "options": ["A. 写直达法", "B. 写回法", "C. 按写分配法", "D. 不按写分配法"]}, {"id": 169, "type": "单选题", "points": 0.2, "question": "下列哪一个因素与高速缓存的命中率无关?", "answer": "B", "options": ["A. 高速缓存的存储容量", "B. 高速缓存的存取速度", "C. 高速缓存的地址映像方法", "D. 高速缓存的替换算法"]}, {"id": 170, "type": "单选题", "points": 0.2, "question": "温彻斯特硬盘是一种(        )的硬盘存储器。", "answer": "C", "options": ["A. 固定磁头固定盘片", "B. 固定磁头可换盘片", "C. 移动磁头固定盘片", "D. 移动磁头可换盘片"]}, {"id": 171, "type": "单选题", "points": 0.2, "question": "在硬盘控制器中，用于把来自读出放大器的信号还原为数据信息并进行CRC校验的部件是(        )。", "answer": "B", "options": ["A. 数据编码电路", "B. 数据译码电路", "C. 串并转换电路", "D. DMA控制器"]}, {"id": 172, "type": "单选题", "points": 0.2, "question": "在硬盘驱动器中，磁头定位系统的作用是驱动磁头沿盘片半径方向移动寻找指定(        )并进行精确定位。", "answer": "A", "options": ["A. 磁道", "B. 记录面", "C. 扇区", "D. 磁盘组"]}, {"id": 173, "type": "单选题", "points": 0.2, "question": "硬盘存储器上面记录的信息采用下面哪一种校验方法?", "answer": "D", "options": ["A. 奇校验", "B. 偶校验", "C. 海明校验", "D. 循环码校验"]}, {"id": 174, "type": "单选题", "points": 0.2, "question": "磁盘存储器的位密度是指沿磁道圆周，单位长度上所记录的二进制位数。通常给出的位密度是(        )。", "answer": "B", "options": ["A. 最外圈磁道的位密度", "B. 最内圈磁道的位密度", "C. 中间磁道的位密度", "D. 各磁道位密度的平均值"]}, {"id": 175, "type": "单选题", "points": 0.2, "question": "硬盘存储器的寻址时间主要由(        )等几个因素决定。", "answer": "D", "options": ["A. 平均寻道时间、平均旋转时间和数据传输率", "B. 磁头译码时间、平均旋转时间和数据传输率", "C. 平均寻道时间、磁头译码时间和数据传输率", "D. 平均寻道时间、磁头译码时间和平均旋转时间"]}, {"id": 176, "type": "单选题", "points": 0.2, "question": "在硬盘存储器中，盘片的转速越高，意味着(        )。", "answer": "C", "options": ["A. 寻道时间越短", "B. 存储密度越高", "C. 数据传输率越高", "D. 自同步能力越强"]}, {"id": 177, "type": "单选题", "points": 0.2, "question": "现在所使用的硬盘存储器一般采用定长数据块记录格式，数据块又称为扇区，通常一个扇区的存储容量为(        )。", "answer": "C", "options": ["A. 128B", "B. 256B", "C. 512B", "D. 1024B"]}, {"id": 178, "type": "单选题", "points": 0.2, "question": "磁盘存储器读写信息的最小单位是(        )。", "answer": "C", "options": ["A. 字节", "B. 字", "C. 扇区", "D. 磁道"]}, {"id": 179, "type": "单选题", "points": 0.2, "question": "采用虚拟存储器的主要目的是(        )。", "answer": "B", "options": ["A. 提高存储器的速度", "B. 增加存储器的容量", "C. 降低存储器的成本", "D. 提高存储器的可靠性"]}, {"id": 180, "type": "单选题", "points": 0.2, "question": "通常虚拟存储系统由(        )两级存储器组成。", "answer": "B", "options": ["A. Cache-主存", "B. 主存-辅存", "C. Cache-辅存", "D. 通用寄存器-主存"]}, {"id": 181, "type": "单选题", "points": 0.2, "question": "如果在高速主机与慢速I/O设备之间实现数据通信，则最好采用(        )。", "answer": "C", "options": ["A. 无条件传送方式", "B. 查询传送方式", "C. 中断传送方式", "D. DMA传送方式"]}, {"id": 182, "type": "单选题", "points": 0.2, "question": "在外围设备的接口电路中，用于解决CPU与外围设备工作速度匹配的部件是(        )。", "answer": "B", "options": ["A. 设备选择电路", "B. 数据缓冲寄存器", "C. 移位寄存器", "D. 中断控制逻辑"]}, {"id": 183, "type": "单选题", "points": 0.2, "question": "在外围设备的接口电路中，用于完成数据串-并格式转换的部件是(        )。", "answer": "C", "options": ["A. 数据缓冲寄存器", "B. 命令/状态寄存器", "C. 移位寄存器", "D. 电平转换电路"]}, {"id": 184, "type": "单选题", "points": 0.2, "question": "在CPU与外围设备进行数据传送时，完全由硬件电路控制I/O操作的传送方式是(        )。", "answer": "D", "options": ["A. 无条件传送方式", "B. 查询传送方式", "C. 中断传送方式", "D. DMA传送方式"]}, {"id": 185, "type": "单选题", "points": 0.2, "question": "按照(        )来分类，可把I/O接口划分成并行接口和串行接口两种类型。", "answer": "A", "options": ["A. 数据传送格式", "B. 时序控制方式", "C. 信息传送控制方式", "D. 应用场合"]}, {"id": 186, "type": "单选题", "points": 0.2, "question": "按照(        )来分类，可把I/O接口划分成同步接口和异步接口两种类型。", "answer": "B", "options": ["A. 数据传送格式", "B. 时序控制方式", "C. 信息传送控制方式", "D. 应用场合"]}, {"id": 187, "type": "单选题", "points": 0.2, "question": "按照(        )来分类，可把I/O接口划分成运行辅助接口、用户交互接口、传感接口、控制接口等类型。", "answer": "D", "options": ["A. 数据传送格式", "B. 时序控制方式", "C. 信息传送控制方式", "D. 应用场合"]}, {"id": 188, "type": "单选题", "points": 0.2, "question": "对于程序查询传送方式，CPU在执行输入/输出操作前，需要反复检测(        )的内容，以判断I/O设备是否准备好。", "answer": "B", "options": ["A. 数据缓冲寄存器", "B. 状态寄存器", "C. 控制寄存器", "D. 命令寄存器"]}, {"id": 189, "type": "单选题", "points": 0.2, "question": "下列哪一种情况不能采用程序中断方式进行处理?", "answer": "C", "options": ["A. 用户通过键盘输入命令", "B. 对程序进行单步调试", "C. 对硬盘存储器进行读写", "D. 多道程序分时运行"]}, {"id": 190, "type": "单选题", "points": 0.2, "question": "DMA方式用于实现(        )之间的数据传送。", "answer": "D", "options": ["A. CPU和内存", "B. 两个I/O设备", "C. CPU和I/O设备", "D. 内存和I/O设备"]}, {"id": 191, "type": "单选题", "points": 0.2, "question": "磁盘存储器通常采用DMA方式和主存交换数据，在DMA接口电路中用于保存磁盘驱动器号、柱面号、盘面号和扇区号的部件是(        )。", "answer": "D", "options": ["A. 主存地址寄存器", "B. 字计数器", "C. 数据缓冲寄存器", "D. 设备地址寄存器"]}, {"id": 192, "type": "单选题", "points": 0.2, "question": "在DMA接口电路中，由控制/状态逻辑发送给CPU的信号是(        )信号。", "answer": "B", "options": ["A. DMA请求", "B. 总线请求", "C. 中断请求", "D. 查询请求"]}, {"id": 193, "type": "单选题", "points": 0.2, "question": "在DMA传送的各种方式中，能较好地发挥主存与CPU工作效率的方式是(        )。", "answer": "C", "options": ["A. 程序查询", "B. 停止CPU访问主存", "C. 周期挪用", "D. DMA与CPU交替访问主存"]}, {"id": 194, "type": "单选题", "points": 0.2, "question": "在小型、微型计算机系统中一般采用总线结构连接CPU、主存和各I/O设备等部件，其主要优点是(        )。", "answer": "D", "options": ["A. 工作速度快", "B. 可靠性高", "C. 系统造价低", "D. 结构简单，易于扩充"]}, {"id": 195, "type": "单选题", "points": 0.2, "question": "系统总线是指(        )。", "answer": "C", "options": ["A. 连接CPU内部各个寄存器和算术逻辑运算部件的信息传输线", "B. 连接某个功能模块插件上各芯片的信息传输线", "C. 连接CPU、主存和各I/O设备的信息传输线", "D. 连接计算机和计算机之间的信息传输线"]}, {"id": 196, "type": "单选题", "points": 0.2, "question": "现在的微型计算机系统采用了下列哪一种总线结构?", "answer": "D", "options": ["A. 单总线结构", "B. 以CPU为中心的双总线结构", "C. 以存储器为中心的双总线结构", "D. 多总线结构"]}, {"id": 197, "type": "单选题", "points": 0.2, "question": "存储器读/写信号是通过(        )传送的。", "answer": "C", "options": ["A. 数据总线", "B. 地址总线", "C. 控制总线", "D. 通信总线"]}, {"id": 198, "type": "单选题", "points": 0.3, "question": "按照(        )来分类，可将总线划分成内部总线、系统总线和通信总线三类。", "answer": "C", "options": ["A. 总线所处的物理位置", "B. 总线传送的信息类型", "C. 总线所连接的部件", "D. 总线传送的定时方式"]}, {"id": 199, "type": "单选题", "points": 0.3, "question": "按照(        )来分类，可将系统总线划分成数据总线、地址总线和控制总线三类。", "answer": "B", "options": ["A. 总线所处的物理位置", "B. 总线传送的信息类型", "C. 总线所连接的部件", "D. 总线传送的定时方式"]}, {"id": 200, "type": "填空题", "points": 0.1, "question": "在IEEE754标准规定的三种浮点数格式中，短浮点数的总位数为____位，长浮点数的总位数为____位，临时浮点数的总位数为____位。", "answer": "(1) 32; (2) 64; (3) 80", "blanks": ["32", "64", "80"]}, {"id": 201, "type": "填空题", "points": 0.1, "question": "只读存储器有多种类型，其中用户不可编程的ROM称为____;用户只能编程一次的ROM称为____;采用紫外线擦除并可多次编程的ROM称为____;采用电擦除并可多次编程的ROM称为____。", "answer": "(1) 掩模ROM(或MaskedROM); (2) 可编程ROM(或PROM); (3) EPROM; (4) EEPROM(或E2PROM)", "blanks": ["掩模ROM(或MaskedROM)", "可编程ROM(或PROM)", "EPROM", "EEPROM(或E2PROM)"]}, {"id": 202, "type": "填空题", "points": 0.1, "question": "语言处理程序用于把源程序转换成计算机能直接识别的二进制代码，它有两种工作方式，即____方式和____方式。", "answer": "(1) 编译; (2) 解释 - # 第2章 数据的机器级表示", "blanks": ["编译", "解释"]}, {"id": 203, "type": "填空题", "points": 0.1, "question": "根据机器指令的____直接转移到相应的微程序入口，称为一级功能转移。", "answer": "(1) 操作码", "blanks": ["操作码"]}, {"id": 204, "type": "填空题", "points": 0.1, "question": "一个定点数由符号位和数值位两部分组成，根据小数点位置的不同，定点数可分为____和____两种形式。", "answer": "(1) 定点整数; (2) 定点小数", "blanks": ["定点整数", "定点小数"]}, {"id": 205, "type": "填空题", "points": 0.1, "question": "根据所采用的地址映像和地址变换方法的不同，可以把虚拟存储器分为____、____和____三种类型。", "answer": "(1) 段式虚拟存储器; (2) 页式虚拟存储器; (3) 段页式虚拟存储器 - # 第7章 互联及输入输出组织", "blanks": ["段式虚拟存储器", "页式虚拟存储器", "段页式虚拟存储器"]}, {"id": 206, "type": "填空题", "points": 0.1, "question": "大多数计算机系统都包括两种存储系统，一种是由____和____构成的Cache存储系统，其设计目标是____;另一种是由____和____构成的虚拟存储系统，其设计目标是____。", "answer": "(1) 高速缓存(或Cache); (2) 主存储器(或主存); (3) 提高存储系统的访问速度; (4) 主存储器(或主存); (5) 辅助存储器(或辅存); (6) 扩大存储系统的存储容量", "blanks": ["高速缓存(或Cache)", "主存储器(或主存)", "提高存储系统的访问速度", "主存储器(或主存)", "辅助存储器(或辅存)", "扩大存储系统的存储容量"]}, {"id": 207, "type": "填空题", "points": 0.1, "question": "后继微地址的形成通常有两种方式，即____和____。", "answer": "(1) 增量方式; (2) 断定方式 - # 第6章 存储器分层体系结构", "blanks": ["增量方式", "断定方式"]}, {"id": 208, "type": "填空题", "points": 0.1, "question": "如果CPU在执行中断服务程序期间不能被其他中断源再次中断，那么这种中断属于____;如果CPU在执行中断服务程序期间可以响应优先级更高的中断请求，那么这种中断属于____，又称为____。", "answer": "(1) 单重中断; (2) 多重中断; (3) 中断嵌套", "blanks": ["单重中断", "多重中断", "中断嵌套"]}, {"id": 209, "type": "填空题", "points": 0.1, "question": "加法单元的进位信号Ci的逻辑表达式通常写成Ci=Gi+Pi·Ci-1，此处的Gi被称为____，Pi被称为____。", "answer": "(1) 进位产生函数; (2) 进位传递函数", "blanks": ["进位产生函数", "进位传递函数"]}, {"id": 210, "type": "填空题", "points": 0.1, "question": "在硬连线控制逻辑中，最重要的部件是____，它根据____、____和被控制部件的反馈信号等信息综合形成各种微操作控制信号。", "answer": "(1) 微操作信号发生器; (2) 时序信号; (3) 操作码译码信号", "blanks": ["微操作信号发生器", "时序信号", "操作码译码信号"]}, {"id": 211, "type": "填空题", "points": 0.1, "question": "控制器是计算机的管理机构和指挥中心，其主要功能可概括为____指令、____指令和____指令。", "answer": "(1) 取; (2) 分析; (3) 执行", "blanks": ["取", "分析", "执行"]}, {"id": 212, "type": "填空题", "points": 0.1, "question": "浮点数的加法运算需要经过____、____、____、____和____五个步骤。", "answer": "(1) 对阶; (2) 尾数相加; (3) 尾数规格化; (4) 舍入处理; (5) 溢出判断", "blanks": ["对阶", "尾数相加", "尾数规格化", "舍入处理", "溢出判断"]}, {"id": 213, "type": "填空题", "points": 0.1, "question": "存储密度是硬盘存储器的一个重要技术指标，它可采用____和____来衡量，前者是指沿盘片半径单位长度所包含的磁道数，后者是指沿磁道方向单位长度所存储的二进制位数。", "answer": "(1) 道密度; (2) 位密度", "blanks": ["道密度", "位密度"]}, {"id": 214, "type": "填空题", "points": 0.2, "question": "能被机器硬件直接识别并执行的指令统称为____。", "answer": "(1) 机器指令", "blanks": ["机器指令"]}, {"id": 215, "type": "填空题", "points": 0.2, "question": "计算机软件可分为____软件和____软件两大类。", "answer": "(1) 系统; (2) 应用", "blanks": ["系统", "应用"]}, {"id": 216, "type": "填空题", "points": 0.2, "question": "请用十进制数填写本题空白处的内容:   ①以原码表示的8位带符号定点整数，其最小值是____，最大值是____;   ②以原码表示的8位带符号定点小数，其最小值是____，最大值是____;   ③以补码表示的8位带符号定点整数，其最小值是____，最大值是____;   ④以补码表示的8位带符号定点小数，其最小值是____，最大值是____。", "answer": "(1) ①-127; (2) 127; (3) ②-1+2^{-7}; (4) 1-2^{-7}; (5) ③-128; (6) 127; (7) ④-1; (8) 1-2^{-7}", "blanks": ["①-127", "127", "②-1+2^{-7}", "1-2^{-7}", "③-128", "127", "④-1", "1-2^{-7}"]}, {"id": 217, "type": "填空题", "points": 0.2, "question": "在微程序控制器中，一系列____的有序集合构成了微程序，通过对微程序进行解释执行从而实现了相应的____的功能。", "answer": "(1) 微指令; (2) 机器指令", "blanks": ["微指令", "机器指令"]}, {"id": 218, "type": "填空题", "points": 0.2, "question": "在单位时间内存储器能传送的信息位数或字节数称为存储器的____。", "answer": "(1) 数据传输率(或存储器带宽)", "blanks": ["数据传输率(或存储器带宽)"]}, {"id": 219, "type": "填空题", "points": 0.2, "question": "计算机系统软件的核心是____。", "answer": "(1) 操作系统", "blanks": ["操作系统"]}, {"id": 220, "type": "填空题", "points": 0.2, "question": "一个完整的硬盘存储器由____、____和硬盘盘片三部分组成。", "answer": "(1) 硬盘控制器(或HDC); (2) 硬盘驱动器(或HDD)", "blanks": ["硬盘控制器(或HDC)", "硬盘驱动器(或HDD)"]}, {"id": 221, "type": "填空题", "points": 0.2, "question": "当I/O设备做好数据传送的准备后，首先向DMA控制器发送____信号，DMA控制器收到该信号后，再向CPU发送____信号，然后CPU向DMA控制器发送____信号，DMA控制器再向I/O设备发送____信号，至此，总线的控制权由CPU移交给DMA控制器。", "answer": "(1) DMA请求; (2) 总线请求; (3) 总线响应(或总线允许); (4) DMA响应(或DMA允许)", "blanks": ["DMA请求", "总线请求", "总线响应(或总线允许)", "DMA响应(或DMA允许)"]}, {"id": 222, "type": "填空题", "points": 0.2, "question": "在补码加减法运算中，可根据两个操作数的符号位Xf、Yf以及运算结果的符号位Sf判断是否发生溢出，其逻辑表达式是____。", "answer": "(1) Xf·Yf·Sf+Xf·Yf·Sf", "blanks": ["Xf·Yf·Sf+Xf·Yf·Sf"]}, {"id": 223, "type": "填空题", "points": 0.2, "question": "在定义微命令时，把不允许同时出现的一组微命令称为____微命令，而把允许同时出现的一组微命令称为____微命令。", "answer": "(1) 互斥型; (2) 相容型", "blanks": ["互斥型", "相容型"]}, {"id": 224, "type": "填空题", "points": 0.2, "question": "RISC的控制器采用____控制，很少或者不采用____控制，这样可以缩短CPU的时钟周期，提高指令的执行速度。", "answer": "(1) 组合逻辑; (2) 微程序 - # 第5章 中央处理器", "blanks": ["组合逻辑", "微程序"]}, {"id": 225, "type": "填空题", "points": 0.2, "question": "在四地址指令中，四个地址码字段的内容分别表示____、____、____以及____。", "answer": "(1) 第一操作数地址; (2) 第二操作数地址; (3) 运算结果地址; (4) 下一条指令地址", "blanks": ["第一操作数地址", "第二操作数地址", "运算结果地址", "下一条指令地址"]}, {"id": 226, "type": "填空题", "points": 0.2, "question": "CPU完成取指令、分析指令和执行指令所需的全部时间称为____;在这段时间内，指令的执行过程可分解成若干个步骤，每个步骤持续的时间被称为____;另外，每个步骤又包含若干个微操作，这些微操作的执行时间是固定的，这个固定的时间分段被称为____。", "answer": "(1) 指令周期; (2) 机器周期(或工作周期); (3) 时钟周期", "blanks": ["指令周期", "机器周期(或工作周期)", "时钟周期"]}, {"id": 227, "type": "填空题", "points": 0.2, "question": "请用十进制数填写本题空白处的内容:   ①8位无符号数可以表示的最小值是____，最大值是____;   ②16位无符号数可以表示的最小值是____，最大值是____。", "answer": "(1) ①0; (2) 255; (3) ②0; (4) 65535", "blanks": ["①0", "255", "②0", "65535"]}, {"id": 228, "type": "填空题", "points": 0.2, "question": "在某计算机系统中，主存包含4096个字块，Cache包含32个字块。如果在Cache和主存之间采用直接映像，那么Cache字块标记为____位;如果采用全相联映像，Cache字块标记为____位;如果采用4路组相联映像，Cache字块标记为____位。", "answer": "(1) 7; (2) 12; (3) 9", "blanks": ["7", "12", "9"]}, {"id": 229, "type": "填空题", "points": 0.2, "question": "RISC的核心思想是通过减少____缩短程序的平均执行时间，从而提高机器的运算速度。", "answer": "(1) 指令执行所需的平均周期数", "blanks": ["指令执行所需的平均周期数"]}, {"id": 230, "type": "填空题", "points": 0.2, "question": "机器数在运算过程中有时需要做舍入处理，常用的舍入方法有____、____和____。", "answer": "(1) 恒舍法; (2) 0舍1入法; (3) 恒置1法", "blanks": ["恒舍法", "0舍1入法", "恒置1法"]}, {"id": 231, "type": "填空题", "points": 0.2, "question": "运算器是完成二进制____运算和____运算的部件。", "answer": "(1) 算术; (2) 逻辑", "blanks": ["算术", "逻辑"]}, {"id": 232, "type": "填空题", "points": 0.2, "question": "浮点数由阶码和尾数两部分组成，其中阶码是定点整数，通常采用____或____表示;而尾数是定点小数，通常采用____或____表示。", "answer": "(1) 补码; (2) 移码; (3) 原码; (4) 补码", "blanks": ["补码", "移码", "原码", "补码"]}, {"id": 233, "type": "填空题", "points": 0.2, "question": "在海明校验码中，每个小组按奇/偶校验产生一个校验结果，各组的校验结果构成了一个r位的二进制编码，该编码被称为____，以识别接收到的海明校验码是否有错误。", "answer": "(1) 指误字", "blanks": ["指误字"]}, {"id": 234, "type": "填空题", "points": 0.2, "question": "在包含多个中断源的中断系统中，采用____技术一方面可实现中断嵌套，另一方面可实现中断升级。", "answer": "(1) 中断屏蔽", "blanks": ["中断屏蔽"]}, {"id": 235, "type": "填空题", "points": 0.2, "question": "单地址指令也可以对两个操作数进行运算，其中一个操作数由指令的地址码字段给出，另一个操作数通常隐含在____中。", "answer": "(1) 累加器", "blanks": ["累加器"]}, {"id": 236, "type": "填空题", "points": 0.2, "question": "假设数据信息的位数为k，校验位的位数为r，现在要设计能检测并纠正1位错的海明校验码，那么k和r应满足关系式____。", "answer": "(1) k+r ≤ 2^r-1", "blanks": ["k+r ≤ 2^r-1"]}, {"id": 237, "type": "填空题", "points": 0.2, "question": "DMA传送方式是指CPU与DMA控制器共享____的方式，目前主要有三种方式，即____、____和____。", "answer": "(1) 主存储器(或主存); (2) 停止CPU访问主存; (3) DMA与CPU交替访问主存(或存储器分时); (4) 周期挪用(或周期窃取)", "blanks": ["主存储器(或主存)", "停止CPU访问主存", "DMA与CPU交替访问主存(或存储器分时)", "周期挪用(或周期窃取)"]}, {"id": 238, "type": "填空题", "points": 0.2, "question": "组相联映像是一种折中的映像方式，如果每个组只包含1个字块，就成为____;如果整个Cache只包含1个组，就成为____。", "answer": "(1) 直接映像; (2) 全相联映像", "blanks": ["直接映像", "全相联映像"]}, {"id": 239, "type": "填空题", "points": 0.2, "question": "在不改变指令字长的前提下，使操作码的位数随地址码个数的减少而增加，从而充分利用指令字的长度增加指令的种类，这种技术被称为____技术。", "answer": "(1) 扩展操作码", "blanks": ["扩展操作码"]}, {"id": 240, "type": "填空题", "points": 0.2, "question": "完整的硬盘地址格式由四部分组成，按照它们对磁头定位的先后顺序依次是____、____、____和____。", "answer": "(1) 驱动器号; (2) 圆柱面号(或磁道号); (3) 记录面号(或磁头号); (4) 扇区号", "blanks": ["驱动器号", "圆柱面号(或磁道号)", "记录面号(或磁头号)", "扇区号"]}, {"id": 241, "type": "填空题", "points": 0.2, "question": "运算器中的核心部件是____，简称为ALU。此外，运算器中还包含若干个通用寄存器，用于暂时存放操作数和中间结果。", "answer": "(1) 算术逻辑运算单元", "blanks": ["算术逻辑运算单元"]}, {"id": 242, "type": "填空题", "points": 0.2, "question": "二级功能转移通常是先按机器指令的____进行第一次转移，再按机器指令的____进行第二次转移，以找到相应的微程序入口。", "answer": "(1) 类型; (2) 操作码", "blanks": ["类型", "操作码"]}, {"id": 243, "type": "填空题", "points": 0.2, "question": "从CPU的角度看，存储系统的设计目标是:速度接近于____，存储容量接近于____，每位平均价格接近于____。", "answer": "(1) 高速缓存(或Cache); (2) 辅助存储器(或辅存); (3) 辅助存储器(或辅存)", "blanks": ["高速缓存(或Cache)", "辅助存储器(或辅存)", "辅助存储器(或辅存)"]}, {"id": 244, "type": "填空题", "points": 0.2, "question": "微指令的编码方法通常有四种，即____、____、____和____。", "answer": "(1) 直接控制法; (2) 最短编码法; (3) 字段直接编码法; (4) 字段间接编码法", "blanks": ["直接控制法", "最短编码法", "字段直接编码法", "字段间接编码法"]}, {"id": 245, "type": "填空题", "points": 0.2, "question": "在原码一位乘法中，首先要求出被乘数和乘数的____，然后才能进行乘法运算。", "answer": "(1) 绝对值", "blanks": ["绝对值"]}, {"id": 246, "type": "填空题", "points": 0.2, "question": "系统总线是指连接____、____和各种I/O设备的信息传输线。", "answer": "(1) CPU(或中央处理器); (2) 主存(或主存储器)", "blanks": ["CPU(或中央处理器)", "主存(或主存储器)"]}, {"id": 247, "type": "填空题", "points": 0.2, "question": "____的移位规则是:符号位不变，左移时最低位补0，右移时最高有效位补1。", "answer": "(1) 负数补码", "blanks": ["负数补码"]}, {"id": 248, "type": "填空题", "points": 0.2, "question": "对存储系统执行写操作有两种方法，一种方法是同时修改Cache和主存单元，这种方法称为____;另一种方法是只写入Cache单元，直到该单元所在的块被替换时才写入主存，这种方法称为____。", "answer": "(1) 写直达法; (2) 写回法", "blanks": ["写直达法", "写回法"]}, {"id": 249, "type": "填空题", "points": 0.2, "question": "在CPU和主存储器之间设置Cache可以提高CPU的访存速度，它依据的是____。", "answer": "(1) 程序访问的局部性原理", "blanks": ["程序访问的局部性原理"]}, {"id": 250, "type": "填空题", "points": 0.2, "question": "一条机器指令通常可以划分成两个字段，即____字段和____字段，前者用于描述本条指令完成的功能，后者用于指示操作对象所在的位置。", "answer": "(1) 操作码; (2) 地址码", "blanks": ["操作码", "地址码"]}, {"id": 251, "type": "填空题", "points": 0.2, "question": "加法器是由若干个加法单元组成的用于完成多位二进制数加法运算的部件，加法器的运算速度主要取决于____的传递速度。", "answer": "(1) 进位信号 - # 第4章 指令系统", "blanks": ["进位信号"]}, {"id": 252, "type": "填空题", "points": 0.2, "question": "为了标识Cache字块是否与主存字块建立了映射，必须为每个Cache字块设置一个____。", "answer": "(1) 有效位", "blanks": ["有效位"]}, {"id": 253, "type": "填空题", "points": 0.2, "question": "一条微指令通常包括两个字段:____和____，前者经过译码或者直接产生一组微命令，以控制有关部件完成规定的操作;后者则提供下一条微指令地址的形成方法或者直接给出下一条微指令地址。", "answer": "(1) 微操作控制字段; (2) 顺序控制字段", "blanks": ["微操作控制字段", "顺序控制字段"]}, {"id": 254, "type": "填空题", "points": 0.2, "question": "条件转移指令所依据的转移条件通常位于CPU内部的____中。", "answer": "(1) 程序状态字寄存器", "blanks": ["程序状态字寄存器"]}, {"id": 255, "type": "填空题", "points": 0.2, "question": "设机器数字长为8位(含1位符号)，其十六进制数值为8AH，那么   ①若该值表示原码时，对应的十进制整数为____;   ②若该值表示补码时，对应的十进制整数为____;   ③若该值表示反码时，对应的十进制整数为____;   ④若该值表示移码时，对应的十进制整数为____。", "answer": "(1) ①-10; (2) ②-118; (3) ③-117; (4) ④10", "blanks": ["①-10", "②-118", "③-117", "④10"]}, {"id": 256, "type": "填空题", "points": 0.2, "question": "完全用二进制代码表示的计算机语言被称为____;用指令助记符、变量、常量、标号等符号书写的计算机语言被称为____。", "answer": "(1) 机器语言; (2) 汇编语言", "blanks": ["机器语言", "汇编语言"]}, {"id": 257, "type": "填空题", "points": 0.2, "question": "某浮点数字长为16位，其中阶码6位，含1位阶符，移码表示;尾数10位，含1位数符，原码表示，规格化。那么   ①该浮点数可表示的非零最小正数的二进制代码是____，对应的十进制真值是____;   ②该浮点数可表示的最大正数的二进制代码是____，对应的十进制真值是____;   ③该浮点数可表示的绝对值最小负数的二进制代码是____，对应的十进制真值是____;   ④该浮点数可表示的绝对值最大负数的二进制代码是____，对应的十进制真值是____。", "answer": "(1) ①000000_2┆0.100000000_2; (2) 2^{-33}; (3) ②111111_2┆0.111111111_2; (4) 2^{31}·(1-2^{-9}); (5) ③000000_2┆1.100000000_2; (6) -2^{-33}; (7) ④111111_2┆1.111111111_2; (8) -2^{31}·(1-2^{-9})", "blanks": ["①000000_2┆0.100000000_2", "2^{-33}", "②111111_2┆0.111111111_2", "2^{31}·(1-2^{-9})", "③000000_2┆1.100000000_2", "-2^{-33}", "④111111_2┆1.111111111_2", "-2^{31}·(1-2^{-9})"]}, {"id": 258, "type": "填空题", "points": 0.2, "question": "硬盘存储器的一个重要技术指标是平均寻址时间，它等于____与____之和。", "answer": "(1) 平均寻道时间; (2) 平均旋转时间", "blanks": ["平均寻道时间", "平均旋转时间"]}, {"id": 259, "type": "填空题", "points": 0.2, "question": "按照冯•诺依曼的设计思想，计算机由____、____、____、____和____五大部件组成。", "answer": "(1) 运算器; (2) 控制器; (3) 存储器; (4) 输入设备; (5) 输出设备", "blanks": ["运算器", "控制器", "存储器", "输入设备", "输出设备"]}, {"id": 260, "type": "填空题", "points": 0.2, "question": "在数据寻址方式中，如果操作数的地址等于程序计数器PC的内容与指令中给出的位移量之和，那么该操作数的寻址方式属于____。", "answer": "(1) 相对寻址", "blanks": ["相对寻址"]}, {"id": 261, "type": "填空题", "points": 0.2, "question": "联合控制方式是____和____相结合的一种控制方式，它综合了上述两种控制方式的优点，又在一定程度上克服了它们的缺点。", "answer": "(1) 同步控制; (2) 异步控制", "blanks": ["同步控制", "异步控制"]}, {"id": 262, "type": "填空题", "points": 0.2, "question": "在数据寻址方式中，如果地址码字段的内容是操作数所在寄存器的编号，那么该操作数的寻址方式属于____。", "answer": "(1) 寄存器直接寻址", "blanks": ["寄存器直接寻址"]}, {"id": 263, "type": "填空题", "points": 0.2, "question": "在微程序控制器中，微地址形成电路用于产生____和____，以保证微程序的连续执行。", "answer": "(1) 初始微地址; (2) 后继微地址", "blanks": ["初始微地址", "后继微地址"]}, {"id": 264, "type": "填空题", "points": 0.2, "question": "在原码和补码乘法运算中，____和____一般取双符号位，而____则取单符号位。", "answer": "(1) 被乘数; (2) 部分积; (3) 乘数", "blanks": ["被乘数", "部分积", "乘数"]}, {"id": 265, "type": "填空题", "points": 0.2, "question": "按存储介质进行分类，可以把存储器分为____、____、____和____四种类型。", "answer": "(1) 磁芯存储器; (2) 半导体存储器; (3) 磁表面存储器; (4) 光学存储器", "blanks": ["磁芯存储器", "半导体存储器", "磁表面存储器", "光学存储器"]}, {"id": 266, "type": "填空题", "points": 0.2, "question": "在RISC指令系统中，只有____和____指令可以访问主存储器，其他指令只能对寄存器进行操作。", "answer": "(1) LOAD; (2) STORE", "blanks": ["LOAD", "STORE"]}, {"id": 267, "type": "填空题", "points": 0.2, "question": "硬盘盘片的表面分布着一组同心圆，所有的信息都记录在这些同心圆上，这些同心圆被称为____。", "answer": "(1) 磁道", "blanks": ["磁道"]}, {"id": 268, "type": "填空题", "points": 0.2, "question": "DMA方式是一种依靠硬件在____和____之间进行直接数据传送，并且在传送过程中不需要____干预的I/O数据传送控制方式。", "answer": "(1) 主存储器(或主存); (2) I/O设备; (3) CPU", "blanks": ["主存储器(或主存)", "I/O设备", "CPU"]}, {"id": 269, "type": "填空题", "points": 0.2, "question": "把信息保存到存储器中的操作又称为____操作，把信息从存储器中提取出来的操作又称为____操作。", "answer": "(1) 写; (2) 读", "blanks": ["写", "读"]}, {"id": 270, "type": "填空题", "points": 0.2, "question": "在微程序控制器中，构成控制信号序列的最小单位被称为____。", "answer": "(1) 微命令", "blanks": ["微命令"]}, {"id": 271, "type": "填空题", "points": 0.2, "question": "双极型静态RAM的位单元电路是由____组成的双稳态触发器，在通电期间如果不对其进行读写可始终保持稳定状态。", "answer": "(1) 晶体三极管", "blanks": ["晶体三极管"]}, {"id": 272, "type": "填空题", "points": 0.2, "question": "转移条件通常由一些标志位组成，常用的标志位包括____标志、____标志、____标志和____标志等。", "answer": "(1) 进位; (2) 零; (3) 符号; (4) 溢出", "blanks": ["进位", "零", "符号", "溢出"]}, {"id": 273, "type": "填空题", "points": 0.2, "question": "根据产生微操作控制信号方式的不同，控制器可分为____型、____型以及由这两种方式结合在一起而形成的PLA控制器。", "answer": "(1) 组合逻辑(或硬联逻辑); (2) 存储逻辑", "blanks": ["组合逻辑(或硬联逻辑)", "存储逻辑"]}, {"id": 274, "type": "填空题", "points": 0.2, "question": "在数据寻址方式中，如果地址码字段的内容就是操作数本身，那么该操作数的寻址方式属于____。", "answer": "(1) 立即寻址", "blanks": ["立即寻址"]}, {"id": 275, "type": "填空题", "points": 0.2, "question": "按存取方式进行分类，可以把存储器分为____、____、____和____四种类型。", "answer": "(1) 随机存储器(或RAM); (2) 只读存储器(或ROM); (3) 顺序存取存储器(或SAM); (4) 直接存取存储器(或DAM)", "blanks": ["随机存储器(或RAM)", "只读存储器(或ROM)", "顺序存取存储器(或SAM)", "直接存取存储器(或DAM)"]}, {"id": 276, "type": "填空题", "points": 0.2, "question": "计算机的中央处理器具有____、____、____、____四个方面的基本功能。", "answer": "(1) 指令控制; (2) 操作控制; (3) 数据运算; (4) 异常处理和中断处理", "blanks": ["指令控制", "操作控制", "数据运算", "异常处理和中断处理"]}, {"id": 277, "type": "填空题", "points": 0.2, "question": "在动态存储器的三种刷新方式中，____是普遍采用的一种刷新方式，因为它既充分利用了芯片所允许的最大刷新时间间隔，保证了存储器的访问速度，又大大缩短了由于刷新产生的“死区”时间。", "answer": "(1) 异步式刷新", "blanks": ["异步式刷新"]}, {"id": 278, "type": "填空题", "points": 0.2, "question": "在微程序控制器中，一条机器指令可由一小段微程序解释执行，微程序保存在CPU内部的一个ROM存储器中，该存储器被称为____。", "answer": "(1) 控制存储器", "blanks": ["控制存储器"]}, {"id": 279, "type": "填空题", "points": 0.2, "question": "在Cache存储系统中，常用的替换算法有随机法、____和____等。", "answer": "(1) 先进先出算法(或FIFO算法); (2) 近期最少使用算法(或LRU算法)", "blanks": ["先进先出算法(或FIFO算法)", "近期最少使用算法(或LRU算法)"]}, {"id": 280, "type": "填空题", "points": 0.2, "question": "在指令寻址方式中，使程序计数器PC的内容加一个增量，从而形成下一条指令的地址，这种寻址方式属于____。", "answer": "(1) 顺序寻址", "blanks": ["顺序寻址"]}, {"id": 281, "type": "填空题", "points": 0.2, "question": "在数据寻址方式中，如果地址码字段的内容是操作数所在存储单元的间接地址，那么该操作数的寻址方式属于____。", "answer": "(1) 存储器间接寻址", "blanks": ["存储器间接寻址"]}, {"id": 282, "type": "填空题", "points": 0.2, "question": "在计算机系统中采用中断技术的原因主要有两点:一是使__________和__________并行工作;二是用于处理紧急事件。", "answer": "(1) CPU(或主机); (2) 外设(或外围设备、I/O设备)", "blanks": ["CPU(或主机)", "外设(或外围设备、I/O设备)"]}, {"id": 283, "type": "填空题", "points": 0.2, "question": "在计算机中存储带符号的数据时，符号位和数值部分均采用二进制代码0、1来表示，这种代码化的数据在计算机中被称为____，而与此对应的用正、负号和绝对值来表示的实际数值称为____。", "answer": "(1) 机器数; (2) 真值", "blanks": ["机器数", "真值"]}, {"id": 284, "type": "填空题", "points": 0.2, "question": "从1946年到现在，电子计算机的发展已经经历了四代，这四代计算机的基本组成元件分别是____、____、____、____。", "answer": "(1) 电子管; (2) 晶体管; (3) 中小规模集成电路; (4) 大规模超大规模集成电路", "blanks": ["电子管", "晶体管", "中小规模集成电路", "大规模超大规模集成电路"]}, {"id": 285, "type": "填空题", "points": 0.2, "question": "转移指令按其转移特征可分为____指令和____指令两种类型。", "answer": "(1) 无条件转移; (2) 条件转移", "blanks": ["无条件转移", "条件转移"]}, {"id": 286, "type": "填空题", "points": 0.2, "question": "按存储器在计算机系统中的作用分类，可以把存储器分为____、____、____和____四种类型。", "answer": "(1) 高速缓存(或Cache); (2) 主存储器(或主存); (3) 辅助存储器(或辅存); (4) 控制存储器(或控存)", "blanks": ["高速缓存(或Cache)", "主存储器(或主存)", "辅助存储器(或辅存)", "控制存储器(或控存)"]}, {"id": 287, "type": "填空题", "points": 0.2, "question": "在数据寻址方式中，如果地址码字段的内容是操作数所在存储单元的地址，那么该操作数的寻址方式属于____。", "answer": "(1) 存储器直接寻址", "blanks": ["存储器直接寻址"]}, {"id": 288, "type": "填空题", "points": 0.2, "question": "在IEEE754标准规定的三种浮点数格式中，阶码都采用移码表示，其中短浮点数的阶码偏移量是____，长浮点数的阶码偏移量是____，临时浮点数的阶码偏移量是____。(请采用十六进制数表示)", "answer": "(1) 7FH; (2) 3FFH; (3) 3FFFH", "blanks": ["7FH", "3FFH", "3FFFH"]}, {"id": 289, "type": "填空题", "points": 0.2, "question": "衡量计算机存储容量大小的最基本单位是字节，不过人们通常用KB或MB表示主存储器的容量，其中1KB等于____字节，而1MB则等于____字节。", "answer": "(1) 1024; (2) 1024×1024(或1048576)", "blanks": ["1024", "1024×1024(或1048576)"]}, {"id": 290, "type": "填空题", "points": 0.2, "question": "指令字的长度是指一条指令中包含的所有____的位数。", "answer": "(1) 二进制位", "blanks": ["二进制位"]}, {"id": 291, "type": "填空题", "points": 0.2, "question": "在DMA传送期间如果不出现____，一般不会影响CPU正在执行的程序，即CPU可以和DMA传送并行工作。", "answer": "(1) 访存冲突", "blanks": ["访存冲突"]}, {"id": 292, "type": "填空题", "points": 0.2, "question": "单管动态存储器的位单元电路由一个____和一个____组成，由于存在漏电流，因此需要定期地____。", "answer": "(1) MOS管; (2) 电容器; (3) 刷新", "blanks": ["MOS管", "电容器", "刷新"]}, {"id": 293, "type": "填空题", "points": 0.2, "question": "移位指令可分为____指令、____指令和循环移位指令三种类型。", "answer": "(1) 算术移位; (2) 逻辑移位", "blanks": ["算术移位", "逻辑移位"]}, {"id": 294, "type": "填空题", "points": 0.2, "question": "CPU是否响应可屏蔽中断请求，取决于对CPU内部____触发器的设置。若执行____指令使该触发器置1时，CPU将响应可屏蔽中断请求;若执行____指令使该触发器置0时，CPU将不响应可屏蔽中断请求。", "answer": "(1) 中断允许; (2) 开; (3) 关", "blanks": ["中断允许", "开", "关"]}, {"id": 295, "type": "填空题", "points": 0.2, "question": "原码除法运算有两种方法，即恢复余数除法和不恢复余数除法，其中后者又称为____。", "answer": "(1) 加减交替法", "blanks": ["加减交替法"]}, {"id": 296, "type": "填空题", "points": 0.2, "question": "在数据寻址方式中，如果地址码字段的内容是操作数地址所在寄存器的编号，那么该操作数的寻址方式属于____。", "answer": "(1) 寄存器间接寻址", "blanks": ["寄存器间接寻址"]}, {"id": 297, "type": "填空题", "points": 0.2, "question": "早期的冯•诺依曼计算机在结构上以____为中心，而现代计算机为了进一步提高系统性能，在结构上改为以____为中心。", "answer": "(1) 运算器; (2) 存储器", "blanks": ["运算器", "存储器"]}, {"id": 298, "type": "填空题", "points": 0.2, "question": "在带符号数的各种编码中，____和____对0的表示有两种形式。", "answer": "(1) 原码; (2) 反码", "blanks": ["原码", "反码"]}, {"id": 299, "type": "填空题", "points": 0.2, "question": "用于连接计算机五大部件并在各部件之间实现信息传送的线路被称为____。", "answer": "(1) 总线", "blanks": ["总线"]}, {"id": 300, "type": "填空题", "points": 0.2, "question": "算术运算指令主要包括____的加、减、乘、除指令和____的加、减、乘、除指令，此外还有加1、减1、求补、比较指令以及十进制加、减法指令等。", "answer": "(1) 定点数; (2) 浮点数", "blanks": ["定点数", "浮点数"]}, {"id": 301, "type": "填空题", "points": 0.2, "question": "移位运算一般分为____和____两种。前者是指被移位的代码具有数值意义，将其看作带符号数，移位过程中必须保持符号位不变;后者是指被移位的代码是纯粹的逻辑代码，不具有数值意义，移位前后没有数量的变化。", "answer": "(1) 算术移位; (2) 逻辑移位", "blanks": ["算术移位", "逻辑移位"]}, {"id": 302, "type": "填空题", "points": 0.2, "question": "控制器中的指令部件用于完成取指令和分析指令，它由____、____、____和____等部件组成。", "answer": "(1) 程序计数器PC; (2) 指令寄存器IR; (3) 指令译码器ID; (4) 地址形成部件", "blanks": ["程序计数器PC", "指令寄存器IR", "指令译码器ID", "地址形成部件"]}, {"id": 303, "type": "填空题", "points": 0.2, "question": "RISC的指令系统简单，适合于采用____技术，使大多数指令可在一个时钟周期内执行完毕。", "answer": "(1) 流水线", "blanks": ["流水线"]}, {"id": 304, "type": "填空题", "points": 0.2, "question": "在计算机中把运算器和控制器组合在一起构成的部件称为____。", "answer": "(1) 中央处理器(或CPU)", "blanks": ["中央处理器(或CPU)"]}, {"id": 305, "type": "填空题", "points": 0.2, "question": "在循环校验码中，可用作生成多项式的二进制编码必须满足三个条件:一是____;二是____;三是____。", "answer": "(1) 任何一位发生错误都应使余数不为0; (2) 不同位发生错误应当使余数不同; (3) 对余数进行模2除应当使余数循环 - # 第3章 运算方法和运算部件", "blanks": ["任何一位发生错误都应使余数不为0", "不同位发生错误应当使余数不同", "对余数进行模2除应当使余数循环"]}, {"id": 306, "type": "填空题", "points": 0.2, "question": "存储器的主要功能是存放____和____，它由若干个存储单元组成，每个存储单元都是按____访问的。", "answer": "(1) 程序; (2) 数据; (3) 地址", "blanks": ["程序", "数据", "地址"]}, {"id": 307, "type": "判断题", "points": 0.6, "question": "大多数微机总线由地址总线、数据总线和控制总线组成，因此，它们是三总线结构的。", "answer": "错", "options": ["A. 对", "B. 错"]}, {"id": 308, "type": "判断题", "points": 0.6, "question": "CPU在响应外设的DMA请求时，也需要像中断处理那样，需在当前指令执行完成后才能转入DMA响应。", "answer": "错", "options": ["A. 对", "B. 错"]}, {"id": 309, "type": "判断题", "points": 0.6, "question": "计算机的主存是由RAM和ROM两种半导体存储器组成的。", "answer": "对", "options": ["A. 对", "B. 错"]}, {"id": 310, "type": "判断题", "points": 0.6, "question": "反码相加运算时，其符号位与数值位一起参加运算，如果有进位出现，则要把它送到最低位去相加，这称为循环进位。", "answer": "对", "options": ["A. 对", "B. 错"]}, {"id": 311, "type": "判断题", "points": 0.6, "question": "指令系统中采用不同寻址方式的目的主要是实现存储程序和程序控制。", "answer": "错", "options": ["A. 对", "B. 错"]}, {"id": 312, "type": "判断题", "points": 0.6, "question": "通过触摸屏既可以看到图形界面，又可以输入位置信息，因此，它既是一个输入设备，也是一个输出设备。", "answer": "错", "options": ["A. 对", "B. 错"]}, {"id": 313, "type": "判断题", "points": 0.6, "question": "控制存储器是用来存放微程序的存储器，它比主存储器速度快。", "answer": "对", "options": ["A. 对", "B. 错"]}, {"id": 314, "type": "判断题", "points": 0.6, "question": "显示适配器中的显示缓冲存储器用于存放显示器将要向CPU输入的信息。", "answer": "错", "options": ["A. 对", "B. 错"]}, {"id": 315, "type": "判断题", "points": 0.6, "question": "指令流水是指将一条指令的执行过程分为n个操作时间大致相等的阶段，每个阶段由一个独立的功能部件来完成，这样n个部件就可以同时执行n条指令的不同阶段，从而大大提高CPU的吞吐率。", "answer": "对", "options": ["A. 对", "B. 错"]}, {"id": 316, "type": "判断题", "points": 0.6, "question": "CPU在响应中断请求时，将程序计数器和有关寄存器内容等系统的状态信息存储起来，以使中断处理结束之后能恢复原来的状态继续执行程序，称为现场保护。", "answer": "对", "options": ["A. 对", "B. 错"]}, {"id": 317, "type": "判断题", "points": 0.7, "question": "根据I/O接口的定义，担当连接设备与主机总线任务的部件称为设备适配器(Adapter)，也称I/O接口(Interface)。那么，Adapter和Interface是等价的。", "answer": "错", "options": ["A. 对", "B. 错"]}, {"id": 318, "type": "判断题", "points": 0.7, "question": "主程序运行时，何时转向为外设服务的中断服务程序是预先安排好的。", "answer": "错", "options": ["A. 对", "B. 错"]}, {"id": 319, "type": "判断题", "points": 0.7, "question": "采用反码和补码，就可以基本上解决负数在机器内部数值连同符号位一起参加运算的问题了。", "answer": "对", "options": ["A. 对", "B. 错"]}, {"id": 320, "type": "判断题", "points": 0.7, "question": "DMA是主存与外设之间交换数据的方式，也可用于主存与主存之间的数据交换。", "answer": "错", "options": ["A. 对", "B. 错"]}, {"id": 321, "type": "判断题", "points": 0.7, "question": "指令系统中采用不同寻址方式的目的主要是缩短指令长度，扩大寻址空间，提高编程的灵活性。", "answer": "对", "options": ["A. 对", "B. 错"]}, {"id": 322, "type": "判断题", "points": 0.7, "question": "CPU可以直接访问主存，而不能直接访问辅存。", "answer": "对", "options": ["A. 对", "B. 错"]}, {"id": 323, "type": "判断题", "points": 0.7, "question": "I/O端口统一编址是指给每个外设分配一个地址编号。", "answer": "错", "options": ["A. 对", "B. 错"]}, {"id": 324, "type": "判断题", "points": 0.7, "question": "在所有的进位计数制中，整数部分最低位的权都是1。", "answer": "对", "options": ["A. 对", "B. 错"]}, {"id": 325, "type": "判断题", "points": 0.7, "question": "微程序控制方法的基本思想是将程序存储原理引入到操作控制部件的设计中，即把一条指令看作是有一个微指令系列组成的微程序。", "answer": "对", "options": ["A. 对", "B. 错"]}, {"id": 326, "type": "判断题", "points": 0.7, "question": "在计算机系统中，除CPU和主存之外的其他部件和设备，常被称为外围设备。", "answer": "对", "options": ["A. 对", "B. 错"]}, {"id": 327, "type": "判断题", "points": 0.7, "question": "LCD和LED显示器一样，都是自发光型，没有背景光源也一样能工作。", "answer": "错", "options": ["A. 对", "B. 错"]}, {"id": 328, "type": "判断题", "points": 0.7, "question": "CPU访问存储器的时间是由存储器的容量决定的，存储容量与越大，访问存储器所需的时间越长。", "answer": "错", "options": ["A. 对", "B. 错"]}, {"id": 329, "type": "判断题", "points": 0.7, "question": "某R进位计数制，其左边一位的权是其相邻的右边一位的权的R倍。", "answer": "对", "options": ["A. 对", "B. 错"]}, {"id": 330, "type": "判断题", "points": 0.7, "question": "DMA控制器和CPU可同时使用总线。", "answer": "错", "options": ["A. 对", "B. 错"]}, {"id": 331, "type": "判断题", "points": 0.7, "question": "存储器元件只读存储器ROM的发展演进的先后顺序是MROM、PROM、UVEPROM、EEPROM、Flash。", "answer": "对", "options": ["A. 对", "B. 错"]}, {"id": 332, "type": "判断题", "points": 0.7, "question": "处理器性能提升的途径主要有两个，一个是提高主频，另一个是改进体系结构。", "answer": "对", "options": ["A. 对", "B. 错"]}, {"id": 333, "type": "判断题", "points": 0.7, "question": "在常见的微机系统中，磁盘常采用通道方式与主存交换信息。", "answer": "错", "options": ["A. 对", "B. 错"]}, {"id": 334, "type": "判断题", "points": 0.7, "question": "中断请求信号IRQ源自于设备的状态就绪标志位RD。", "answer": "对", "options": ["A. 对", "B. 错"]}, {"id": 335, "type": "判断题", "points": 0.7, "question": "CPU在响应外设的DMA请求时，也需要像中断处理那样，保存断点和现场，以便DMA结束后再恢复断点和现场。", "answer": "错", "options": ["A. 对", "B. 错"]}, {"id": 336, "type": "判断题", "points": 0.7, "question": "浮点数的取值范围由阶码的位数决定，而精度由尾数的位数决定。", "answer": "对", "options": ["A. 对", "B. 错"]}, {"id": 337, "type": "简答题", "points": 1.4, "question": "同步通信与异步通信区别？", "answer": "1.同步通信要求接收端时钟频率和发送端时钟频率一致，发送端发送连续的比特流；异步通信时不要求接收端时钟和发送端时钟同步，发送端发送完一个字节后，可经过任意长的时间间隔再发送下一个字节。2.同步通信效率高；异步通信效率较低。3.同步通信较复杂，双方时钟的允许误差较小；异步通信简单，双方时钟可允许一定误差。4.同步通信可用于点对多点；异步通信只适用于点对点。"}, {"id": 338, "type": "简答题", "points": 1.4, "question": "计算机体系改进的目标是什么?对冯.诺依曼计算机体系结构改进的具体措施都有哪些?", "answer": "计算机体系结构发展的目标是并行与共享。 对冯诺依曼体系结构的改进有， (1)从以运算器为中心到以存储器为中心。技术路线:分时操作系统、中断控制技术、DAM控制技术、总线技术 (2)指令执行的并行与共享。技术路线:指令的流水作业 (3)处理器并行与共享。技术路线:SMP(对称多处理结构)，MPP(大规模并行处理系统)，CMP(单芯片多处理器，简称多核CPU)"}, {"id": 339, "type": "简答题", "points": 1.4, "question": "算盘和算筹与现代计算机的差距主要体现在哪些方面?成为现代计算机应具备哪些功能?", "answer": "现代计算机可以自动执行程序，而算盘和算筹不能自动执行程序，必须人工进行，计算者被绑定在计算过程中。 (1)具有适合工作原件的内动力(内动力) (2)具有内程序执行机制(内程序) (3)具有与内程序相适应的数据和程序存储与表示形式(存储) (4)可以实现系统运行中的自我管理( )"}, {"id": 340, "type": "简答题", "points": 1.4, "question": "简述总线接口的功能有哪些?", "answer": "①控制:传递总线上的控制信息，主设备会通过总线接口向从设备发出控制信息。②数据缓存:在总线传递信息时，在总线接口中临时存放数据。③状态设置通过总线和转换从设备的工作信息，便于主设备了解从设备的信息。④数据转换:某些总线接口需要对传递的数据进行转换。⑤整理:对接口本身进行调整。⑥程序中断。"}, {"id": 341, "type": "简答题", "points": 1.4, "question": "磁盘和光盘相对的优缺点分别是什么?磁光盘是如何对他们的优缺点进行综合的?", "answer": "磁盘(主要指硬磁盘)的优缺点: 优点:存储容量大、位成本低、读写速度快(尤其随机存取)、可多次擦写、保存时间长(常温下可达10年以上)。 缺点:机械结构较复杂，怕震动，对环境(灰尘、温度)有一定要求，功耗相对较高，存在机械磨损。 光盘(主要指只读/一次性写入光盘)的优缺点: 优点:记录密度高(单张DVD可达4.7GB)、成本极低(压制成本)、可靠性高(非接触读写、无磨损)、信息保存时间长(可达50-100年)、体积小、便于携带和分发。 缺点:大多数光盘(CD-ROM、DVD-ROM)只能读取不能改写;可记录光盘(CD-R、DVD-R)只能写一次;可重写光盘(CD-RW、DVD-RW)擦写速度较慢，且需要专用驱动器;写入速度较硬盘慢。"}, {"id": 342, "type": "简答题", "points": 1.4, "question": "简述总线通信中，主从双方之间的时序控制方式有哪几种?分别适用于什么样的情形?", "answer": "(1)同步通信。特点是模块之间地配合简单一致，采用了公共时钟，每个部件什么时候发送或接受信息都有同一地时钟规定。因此有较高的传输效率，缺点是所有模块都强求一致的同一时限，使设计缺乏灵活性。(2)异步通信。双方地操作不依赖基于共同时钟地时间标准，而是一方地操作依赖于另一方地操作，形成一种“请求-应答”方式，或称为握手方式，采用地通信协议称为握手协议。(3)半同步通信。特点是用系统时钟同步，但对慢速设备可延长传输数据的周期。适用于系统工作速度不高，但又包含了许多工作速度差异较大地各类设备地简单系统。它的控制方式比异步通信简单，在全系统内各模块又在统一的系统时钟控制下同步工作，可靠性高，同步结构比较方便。缺点是对系统时钟频率不能要求太高，从整体上看，系统工作地速度不会很高。(4)分离式通信。思想是将一个传输周期分解为两个子周期。特点是每个模块占用总线使用权都必须提出申请。在得到总线使用权后，主模块在限定的时间内向对方发送信息，采用同步方式传送，不再等待对方的回答信号。各模块在准备数据的过程中都不占用总线，总线可以接受其他模块的请求。总线被占用时都在做有效工作，不存在空闲等待时间，充分地利用了总线地有效占用，从而实现了在多个主、从模块间进行交叉重叠并行式传送，这对大型计算及是极为重要地。这种控制方式比较复杂，一般普通微型计算机系统很少采用。"}, {"id": 343, "type": "简答题", "points": 1.4, "question": "假定某计算机1和计算机2以不同的方式实现了相同的指令集，该指令集中共有A、B、C、D 4类指令，它们所占的比例分别为40%、20%、15%和25%。计算机1和计算机2的时钟周期分别为600MHz和800MHz，各类指令在两计算机上的CPI如下表所示。求两计算机的MIPS各为多少？              各类指令在两计算机上的CPI     指令类型", "answer": "答：CPI1＝ 2*40% + 3*20% + 4*15% + 5*25% = 3.25 MIPS1＝ f/CPI1 = 600/3.25 = 185 CPI2＝2*40% + 2* 20% + 3*15% + 4*25% = 2.65 MIPS2＝ f/CPI2 = 800/2.65 = 302"}, {"id": 344, "type": "简答题", "points": 1.4, "question": "要求用128K×16位的SRAM芯片设计512K×16位的存储器，SRAM芯片有两个控制端：当 CS 有效时该片选中。当W/R=1时执行读操作，当W/R=0时执行写操作。用64K×16位的EPROM芯片组成128K×16位的只读存储器。 EPROM存储单元地址从0开始连续编址，SRAM存储单元地址接在其后连续编址。试问：", "answer": "答：（1）存储器的总容量为：512K×16位（SRAM）+128K×16位（EPROM）=640K×16位。 数据寄存器16位。 （2）因为2^20=1024K>640K，所以地址寄存器20位。 （3）所需EPROM芯片数为（128K×2B）/（64K×2B）=2（片）"}, {"id": 345, "type": "简答题", "points": 1.4, "question": "设Cache存取周期为45ns、RAM存取周期为200ns，CPU执行某一段程序过程中，访问存储系统为1000次，其中访问主存为10次，问：", "answer": "答：(1) Cache的命中率h = (1000-10)/1000 = 99% (2) 访问内存的平均时间 Ta = h.tc+(1-h)tM = 99%*45+1%*200 = 46.55 ns (3) Cache-主存的效率 = Tc/Ta = 45/46.55 = 96.7%"}, {"id": 346, "type": "简答题", "points": 1.4, "question": "指令字长", "answer": "指令字长是指机器指令中二进制代码的总位数"}, {"id": 347, "type": "简答题", "points": 1.5, "question": "流水线中的多发技术", "answer": "为了提高流水线的性能，设法在一个时钟周期（机器主频的倒数）内产生更多条指令的结果，这就是流水线中的多发技术 。"}, {"id": 348, "type": "简答题", "points": 1.5, "question": "微操作命令和微操作", "answer": "答： 微操作命令是控制完成微操作的命令；微操作是由微操作命令控制实现的最基本操作。"}, {"id": 349, "type": "简答题", "points": 1.5, "question": "基址寻址", "answer": "基址寻址有效地址等于形式地址加上基址寄存器的内容。"}, {"id": 350, "type": "简答题", "points": 1.5, "question": "快速缓冲存储器", "answer": "快速缓冲存储器是为了提高访存速度，在 CPU 和主存之间增设的高速存储器，它对用户是透明的。只要将 CPU 最近期需用的信息从主存调入缓存，这样 CPU 每次只须访问快速缓存就可达到访问主存的目的，从而提高了访存速度。"}];
+
+// ============================================
+// STATE
+// ============================================
+const questions = MARKDOWN_DATA;
+let currentFilter = '全部';
+let filteredIds = questions.map(q => q.id);
+let currentIndex = 0;
+let shuffled = false;
+let answered = false;
+
+// Progress from localStorage
+let progress = JSON.parse(localStorage.getItem('quiz-progress') || '{}');
+
+function saveProgress() {
+  localStorage.setItem('quiz-progress', JSON.stringify(progress));
+}
+
+// ============================================
+// FILTERING
+// ============================================
+function applyFilter(filter) {
+  currentFilter = filter;
+  answered = false;
+
+  if (filter === '全部') {
+    filteredIds = questions.map(q => q.id);
+  } else if (filter === '错题') {
+    filteredIds = questions.filter(q => progress[q.id] === 'wrong').map(q => q.id);
+  } else {
+    filteredIds = questions.filter(q => q.type === filter).map(q => q.id);
+  }
+
+  if (shuffled) {
+    filteredIds = shuffle([...filteredIds]);
+  }
+
+  currentIndex = 0;
+  updateSidebar();
+  renderQuestion();
+}
+
+// ============================================
+// SHUFFLE
+// ============================================
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function shuffleToggle() {
+  shuffled = !shuffled;
+  document.getElementById('shuffle-btn').classList.toggle('active', shuffled);
+
+  if (shuffled) {
+    filteredIds = shuffle([...filteredIds]);
+  } else {
+    applyFilter(currentFilter);
+    return;
+  }
+
+  currentIndex = 0;
+  answered = false;
+  renderQuestion();
+}
+
+// ============================================
+// RENDERING
+// ============================================
+function getQuestionById(id) {
+  return questions.find(q => q.id === id);
+}
+
+function renderQuestion() {
+  const card = document.getElementById('question-card');
+
+  if (filteredIds.length === 0) {
+    card.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">_(._.)_</div>
+        <p>${currentFilter === '错题' ? '还没有错题，继续加油！' : '该分类下没有题目'}</p>
+      </div>
+    `;
+    updateProgress();
+    return;
+  }
+
+  const q = getQuestionById(filteredIds[currentIndex]);
+  if (!q) return;
+
+  answered = progress[q.id] !== undefined;
+
+  let html = `
+    <div class="q-header">
+      <span class="q-number">#${q.id}</span>
+      <span class="q-type">${q.type}</span>
+      <span class="q-points">${q.points}分</span>
+    </div>
+    <div class="q-text">${escapeHtml(q.question)}</div>
+  `;
+
+  if (q.type === '单选题') {
+    html += renderChoiceOptions(q);
+  } else if (q.type === '判断题') {
+    html += renderJudgeButtons(q);
+  } else if (q.type === '填空题') {
+    html += renderBlanks(q);
+  } else if (q.type === '简答题') {
+    html += renderEssay(q);
+  }
+
+  html += `<div class="feedback" id="feedback"></div>`;
+
+  html += `
+    <div class="actions">
+      ${q.type === '简答题' ? `<button class="btn btn-primary" onclick="showEssayAnswer()">显示答案</button>` : ''}
+      <button class="btn btn-secondary" onclick="prevQuestion()" ${currentIndex === 0 ? 'disabled' : ''}>上一题</button>
+      <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()">
+        ${currentIndex < filteredIds.length - 1 ? '下一题' : '完成'}
+      </button>
+    </div>
+  `;
+
+  card.innerHTML = html;
+  updateProgress();
+  updateSidebar();
+
+  // Restore answered state
+  if (answered && q.type !== '简答题') {
+    showFeedback(q);
+  }
+}
+
+function renderChoiceOptions(q) {
+  const state = progress[q.id];
+  let html = '<div class="options">';
+
+  q.options.forEach((opt, i) => {
+    const letter = opt.charAt(0);
+    const text = opt.substring(3);
+    let cls = 'option';
+
+    if (state !== undefined) {
+      cls += ' disabled';
+      if (letter === q.answer) cls += ' correct';
+      if (state.userAnswer === letter && state.userAnswer !== q.answer) cls += ' wrong';
+    } else if (state === undefined) {
+      // not answered yet
+    }
+
+    html += `
+      <div class="${cls}" data-letter="${letter}" onclick="selectChoice('${letter}')">
+        <span class="opt-letter">${letter}</span>
+        <span class="opt-text">${escapeHtml(text)}</span>
+      </div>
+    `;
+  });
+
+  html += '</div>';
+  return html;
+}
+
+function renderJudgeButtons(q) {
+  const state = progress[q.id];
+  let html = '<div class="judge-btns">';
+
+  ['对', '错'].forEach(label => {
+    let cls = 'judge-btn';
+
+    if (state !== undefined) {
+      cls += ' disabled';
+      if (label === q.answer) cls += ' selected-correct';
+      if (state.userAnswer === label && state.userAnswer !== q.answer) cls += ' selected-wrong';
+    }
+
+    html += `<button class="${cls}" onclick="selectJudge('${label}')">${label}</button>`;
+  });
+
+  html += '</div>';
+  return html;
+}
+
+function renderBlanks(q) {
+  const state = progress[q.id];
+  const blankCount = q.blanks ? q.blanks.length : (q.answer.match(/\(\d+\)/g) || []).length || 1;
+  let html = '<div class="blanks">';
+
+  for (let i = 0; i < blankCount; i++) {
+    const userVal = state && state.userAnswer ? state.userAnswer[i] || '' : '';
+    const correctVal = q.blanks && q.blanks[i] ? q.blanks[i] : '';
+    let inputCls = 'blank-input';
+
+    if (state !== undefined) {
+      inputCls += ' disabled';
+      // Simple match check
+      const isCorrect = fuzzyMatch(userVal, correctVal);
+      inputCls += isCorrect ? ' correct' : ' wrong';
+    }
+
+    html += `
+      <div class="blank-row">
+        <span class="blank-label">(${i + 1})</span>
+        <div style="flex:1">
+          <input type="text" class="${inputCls}" value="${escapeHtml(userVal)}"
+                 data-index="${i}" placeholder="输入答案..." ${state !== undefined ? 'disabled' : ''}>
+          ${state !== undefined ? `<div class="blank-answer show">正确答案: ${escapeHtml(correctVal)}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  html += '</div>';
+
+  if (state === undefined) {
+    html += `<button class="btn btn-primary" style="margin-bottom:20px" onclick="submitBlanks()">提交答案</button>`;
+  }
+
+  return html;
+}
+
+function renderEssay(q) {
+  const state = progress[q.id];
+  let html = '<div class="essay-area">';
+
+  html += `
+    <textarea class="essay-textarea" placeholder="写下你的答案..." ${state !== undefined ? 'disabled' : ''}>${state && state.userAnswer ? state.userAnswer : ''}</textarea>
+    <div class="essay-answer" id="essay-answer">
+      <h4>// 参考答案</h4>
+      <p>${escapeHtml(q.answer)}</p>
+    </div>
+  </div>`;
+
+  return html;
+}
+
+function showFeedback(q) {
+  const fb = document.getElementById('feedback');
+  if (!fb) return;
+
+  const state = progress[q.id];
+  if (!state) return;
+
+  if (q.type === '单选题' || q.type === '判断题') {
+    if (state.result === 'correct') {
+      fb.className = 'feedback show correct';
+      fb.innerHTML = '&#10003; 回答正确！';
+    } else {
+      fb.className = 'feedback show wrong';
+      fb.innerHTML = `&#10007; 回答错误 — 正确答案: <strong>${q.answer}</strong>`;
+    }
+  } else if (q.type === '填空题') {
+    const allCorrect = state.userAnswer.every((ans, i) => fuzzyMatch(ans, q.blanks[i]));
+    if (allCorrect) {
+      fb.className = 'feedback show correct';
+      fb.innerHTML = '&#10003; 全部正确！';
+    } else {
+      fb.className = 'feedback show wrong';
+      fb.innerHTML = '&#10007; 部分回答有误，请查看下方正确答案';
+    }
+  }
+}
+
+// ============================================
+// ANSWER HANDLING
+// ============================================
+function selectChoice(letter) {
+  if (answered) return;
+  const q = getQuestionById(filteredIds[currentIndex]);
+  if (!q || q.type !== '单选题') return;
+
+  answered = true;
+  const isCorrect = letter === q.answer;
+  progress[q.id] = { userAnswer: letter, result: isCorrect ? 'correct' : 'wrong' };
+  saveProgress();
+  renderQuestion();
+}
+
+function selectJudge(label) {
+  if (answered) return;
+  const q = getQuestionById(filteredIds[currentIndex]);
+  if (!q || q.type !== '判断题') return;
+
+  answered = true;
+  const isCorrect = label === q.answer;
+  progress[q.id] = { userAnswer: label, result: isCorrect ? 'correct' : 'wrong' };
+  saveProgress();
+  renderQuestion();
+}
+
+function submitBlanks() {
+  const q = getQuestionById(filteredIds[currentIndex]);
+  if (!q || q.type !== '填空题') return;
+
+  const inputs = document.querySelectorAll('.blank-input');
+  const answers = [];
+  inputs.forEach(inp => answers.push(inp.value.trim()));
+
+  answered = true;
+  progress[q.id] = { userAnswer: answers };
+  saveProgress();
+  renderQuestion();
+}
+
+function showEssayAnswer() {
+  const el = document.getElementById('essay-answer');
+  if (el) {
+    el.classList.toggle('show');
+  }
+
+  const q = getQuestionById(filteredIds[currentIndex]);
+  if (q && !progress[q.id]) {
+    const textarea = document.querySelector('.essay-textarea');
+    progress[q.id] = { userAnswer: textarea ? textarea.value : '', result: 'essay' };
+    saveProgress();
+    updateSidebar();
+  }
+}
+
+// ============================================
+// NAVIGATION
+// ============================================
+function nextQuestion() {
+  if (currentIndex < filteredIds.length - 1) {
+    currentIndex++;
+    answered = progress[filteredIds[currentIndex]] !== undefined;
+    renderQuestion();
+  }
+}
+
+function prevQuestion() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    answered = progress[filteredIds[currentIndex]] !== undefined;
+    renderQuestion();
+  }
+}
+
+function goToQuestion(id) {
+  const idx = filteredIds.indexOf(id);
+  if (idx >= 0) {
+    currentIndex = idx;
+    answered = progress[filteredIds[currentIndex]] !== undefined;
+    renderQuestion();
+  }
+}
+
+// ============================================
+// UTILITIES
+// ============================================
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function fuzzyMatch(userAns, correctAns) {
+  if (!userAns || !correctAns) return false;
+  const normalize = s => s.replace(/[\s,，。、;；:：()（）\[\]【】""'']/g, '').toLowerCase();
+  return normalize(userAns) === normalize(correctAns);
+}
+
+function updateProgress() {
+  const total = filteredIds.length;
+  const done = filteredIds.filter(id => progress[id] !== undefined).length;
+  const pct = total > 0 ? Math.round((currentIndex + 1) / total * 100) : 0;
+  const donePct = total > 0 ? Math.round(done / total * 100) : 0;
+
+  document.getElementById('progress-text').textContent = `第 ${currentIndex + 1} 题 / ${total}`;
+  document.getElementById('progress-pct').textContent = `${donePct}% 已做`;
+  document.getElementById('progress-fill').style.width = `${donePct}%`;
+}
+
+function updateSidebar() {
+  // Counts
+  document.getElementById('count-all').textContent = questions.length;
+  document.getElementById('count-单选题').textContent = questions.filter(q => q.type === '单选题').length;
+  document.getElementById('count-填空题').textContent = questions.filter(q => q.type === '填空题').length;
+  document.getElementById('count-判断题').textContent = questions.filter(q => q.type === '判断题').length;
+  document.getElementById('count-简答题').textContent = questions.filter(q => q.type === '简答题').length;
+  document.getElementById('count-wrong').textContent = questions.filter(q => progress[q.id] === 'wrong').length;
+
+  // Stats
+  const answeredIds = Object.keys(progress).map(Number);
+  const correctCount = answeredIds.filter(id => progress[id].result === 'correct').length;
+  const wrongCount = answeredIds.filter(id => progress[id].result === 'wrong').length;
+  const totalDone = correctCount + wrongCount;
+  const rate = totalDone > 0 ? Math.round(correctCount / totalDone * 100) : 0;
+
+  document.getElementById('stat-done').textContent = `${answeredIds.length} / ${questions.length}`;
+  document.getElementById('stat-correct').textContent = correctCount;
+  document.getElementById('stat-wrong').textContent = wrongCount;
+  document.getElementById('stat-rate').textContent = totalDone > 0 ? `${rate}%` : '--%';
+
+  // Active filter button
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === currentFilter);
+  });
+}
+
+function resetProgress() {
+  if (confirm('确定要重置所有做题进度吗？此操作不可撤销。')) {
+    progress = {};
+    saveProgress();
+    answered = false;
+    renderQuestion();
+    updateSidebar();
+  }
+}
+
+// ============================================
+// KEYBOARD SHORTCUTS
+// ============================================
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+  const q = filteredIds.length > 0 ? getQuestionById(filteredIds[currentIndex]) : null;
+
+  if (e.key >= '1' && e.key <= '4' && q && q.type === '单选题' && !answered) {
+    const letters = ['A', 'B', 'C', 'D'];
+    selectChoice(letters[parseInt(e.key) - 1]);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (q && q.type === '填空题' && !answered) {
+      submitBlanks();
+    } else {
+      nextQuestion();
+    }
+  } else if (e.key === ' ' && q && q.type === '简答题') {
+    e.preventDefault();
+    showEssayAnswer();
+  } else if (e.key === 'ArrowLeft') {
+    prevQuestion();
+  } else if (e.key === 'ArrowRight') {
+    nextQuestion();
+  }
+});
+
+// ============================================
+// SIDEBAR FILTER CLICKS
+// ============================================
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    applyFilter(btn.dataset.filter);
+  });
+});
+
+// ============================================
+// INIT
+// ============================================
+updateSidebar();
+renderQuestion();
+</script>
+</body>
+</html>

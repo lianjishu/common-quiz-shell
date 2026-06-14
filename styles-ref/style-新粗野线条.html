@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Style 2 — 新粗野线条风</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FFF8E7;
+  --paper: #FFFFFF;
+  --ink: #000000;
+  --accent: #FFE066;
+  --red: #FF6B6B;
+  --blue: #4DABF7;
+  --green: #51CF66;
+  --pink: #FFA8A8;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  padding: 32px;
+  font-size: 14px;
+  line-height: 1.5;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: -1px -1px;
+  min-height: 100vh;
+}
+.demo-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--bg);
+  display: inline-block;
+  padding: 6px 14px;
+  border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--red);
+  margin-bottom: 28px;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  width: fit-content;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 32px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.sidebar {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+  padding: 20px;
+  height: fit-content;
+}
+.sidebar h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 16px;
+  border-bottom: 3px solid var(--ink);
+  padding-bottom: 8px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  border: 2px solid transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: all 80ms ease;
+}
+.nav-item:hover:not(.active) { background: rgba(0,0,0,0.05); }
+.nav-item.active {
+  background: var(--accent);
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.main { min-width: 0; }
+.progress {
+  height: 16px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 32%;
+  background-image: repeating-linear-gradient(
+    45deg, var(--accent), var(--accent) 8px, var(--ink) 8px, var(--ink) 9px
+  );
+}
+.q-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.q-type {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 5px 12px;
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--red);
+  letter-spacing: 0.05em;
+}
+.q-card {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: 8px 8px 0 var(--ink);
+  padding: 28px;
+}
+.q-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+.option {
+  border: 3px solid var(--ink);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  background: var(--paper);
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: all 80ms ease;
+  font-weight: 500;
+  font-size: 14px;
+}
+.option:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+.option:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+.option-letter {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+  background: var(--paper);
+}
+.option.correct {
+  background: var(--green);
+}
+.option.correct .option-letter {
+  background: var(--ink);
+  color: var(--green);
+}
+.option.wrong {
+  background: var(--pink);
+}
+.option.wrong .option-letter {
+  background: var(--ink);
+  color: var(--pink);
+}
+.feedback {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: var(--green);
+  border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+.feedback strong { text-transform: uppercase; margin-right: 6px; }
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  justify-content: space-between;
+}
+.btn {
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  padding: 11px 22px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: all 80ms ease;
+  color: var(--ink);
+}
+.btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+.btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+.btn-primary {
+  background: var(--accent);
+}
+</style>
+</head>
+<body>
+<div class="demo-label">Style 2 · Neo-Brutalism · 新粗野线条</div>
+<div class="layout">
+  <aside class="sidebar">
+    <h3>题目类型</h3>
+    <div class="nav-item active">全部题目</div>
+    <div class="nav-item">单选题</div>
+    <div class="nav-item">填空题</div>
+    <div class="nav-item">判断题</div>
+    <div class="nav-item">简答题</div>
+  </aside>
+  <main class="main">
+    <div class="progress"><div class="progress-fill"></div></div>
+    <div class="q-meta">
+      <span>题目 #12 / 350</span>
+      <span class="q-type">单选题</span>
+    </div>
+    <div class="q-card">
+      <div class="q-title">CPU 内部完成算术逻辑运算的部件是？</div>
+      <div class="option">
+        <span class="option-letter">A</span>
+        <span>控制器 (CU)</span>
+      </div>
+      <div class="option correct">
+        <span class="option-letter">B</span>
+        <span>算术逻辑单元 (ALU)</span>
+      </div>
+      <div class="option">
+        <span class="option-letter">C</span>
+        <span>存储器 (Memory)</span>
+      </div>
+      <div class="option wrong">
+        <span class="option-letter">D</span>
+        <span>寄存器组 (Register File)</span>
+      </div>
+      <div class="feedback"><strong>✓ Correct!</strong> ALU 即算术逻辑单元，专门执行算术与逻辑运算。</div>
+      <div class="actions">
+        <button class="btn">← 上一题</button>
+        <button class="btn btn-primary">下一题 →</button>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

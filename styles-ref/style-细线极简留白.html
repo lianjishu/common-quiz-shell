@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Style 4 — 细线极简留白风</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FAFAF9;
+  --paper: #FFFFFF;
+  --ink: #1C1917;
+  --ink-2: #78716C;
+  --line: #E7E5E4;
+  --line-2: #D6D3D1;
+  --accent: #0F766E;
+  --correct: #166534;
+  --wrong: #991B1B;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  padding: 56px 32px;
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+.demo-label {
+  font-family: 'Fraunces', serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  border-top: 1px solid var(--line-2);
+  border-bottom: 1px solid var(--line-2);
+  padding: 10px 0;
+  margin-bottom: 56px;
+  max-width: 980px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 64px;
+  max-width: 980px;
+  margin: 0 auto;
+}
+.sidebar {
+  border-right: 1px solid var(--line-2);
+  padding-right: 32px;
+  height: fit-content;
+}
+.sidebar h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  font-weight: 500;
+  font-style: italic;
+  margin-bottom: 28px;
+  color: var(--ink-2);
+  letter-spacing: 0.02em;
+}
+.nav-item {
+  display: block;
+  padding: 11px 0;
+  color: var(--ink-2);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 180ms ease;
+  position: relative;
+  letter-spacing: 0.01em;
+}
+.nav-item:hover { color: var(--ink); }
+.nav-item.active {
+  color: var(--ink);
+  font-weight: 500;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: -32px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 1px;
+  background: var(--ink);
+}
+.main { min-width: 0; }
+.progress {
+  height: 1px;
+  background: var(--line);
+  margin-bottom: 48px;
+  position: relative;
+}
+.progress-fill {
+  position: absolute;
+  left: 0; top: 0;
+  height: 1px;
+  background: var(--ink);
+  width: 32%;
+  transition: width 300ms ease;
+}
+.q-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 11px;
+  color: var(--ink-2);
+  margin-bottom: 32px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.q-type {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 13px;
+}
+.q-card { background: transparent; }
+.q-num {
+  font-family: 'Fraunces', serif;
+  font-size: 12px;
+  color: var(--ink-2);
+  letter-spacing: 0.15em;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+}
+.q-title {
+  font-family: 'Fraunces', serif;
+  font-size: 30px;
+  font-weight: 400;
+  margin-bottom: 56px;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+.options {
+  border-top: 1px solid var(--line);
+}
+.option {
+  padding: 22px 0;
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--line);
+  transition: padding 180ms ease, color 180ms ease;
+}
+.option:hover { padding-left: 8px; color: var(--ink); }
+.option-letter {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  color: var(--ink-2);
+  width: 24px;
+  flex-shrink: 0;
+  font-style: italic;
+}
+.option-text {
+  flex: 1;
+  font-size: 15px;
+  color: var(--ink);
+}
+.option-mark {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-2);
+  letter-spacing: 0.02em;
+}
+.option.correct .option-letter { color: var(--correct); }
+.option.correct .option-mark { color: var(--correct); font-weight: 500; }
+.option.wrong .option-letter { color: var(--wrong); }
+.option.wrong .option-mark { color: var(--wrong); }
+.feedback {
+  margin-top: 40px;
+  font-size: 14px;
+  color: var(--ink-2);
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  border-left: 1px solid var(--line-2);
+  padding: 4px 0 4px 20px;
+  line-height: 1.6;
+}
+.feedback strong {
+  color: var(--ink);
+  font-style: normal;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  font-size: 12px;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+.actions {
+  display: flex;
+  gap: 48px;
+  margin-top: 56px;
+  justify-content: space-between;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+}
+.btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--ink);
+  font-family: inherit;
+  letter-spacing: 0.04em;
+  position: relative;
+}
+.btn::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -6px;
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transition: transform 220ms ease;
+  transform-origin: left;
+}
+.btn:hover::after { transform: scaleX(1); }
+</style>
+</head>
+<body>
+<div class="demo-label">Style 4 · Editorial Minimal · 细线极简留白</div>
+<div class="layout">
+  <aside class="sidebar">
+    <h3>— Filters</h3>
+    <div class="nav-item active">All Questions</div>
+    <div class="nav-item">Multiple Choice</div>
+    <div class="nav-item">Fill in the Blank</div>
+    <div class="nav-item">True / False</div>
+    <div class="nav-item">Essay</div>
+  </aside>
+  <main class="main">
+    <div class="progress"><div class="progress-fill"></div></div>
+    <div class="q-meta">
+      <span>Question 12 of 350</span>
+      <span class="q-type">— Multiple Choice</span>
+    </div>
+    <div class="q-card">
+      <div class="q-num">№ 012</div>
+      <div class="q-title">Which component inside the CPU performs arithmetic and logical operations?</div>
+      <div class="options">
+        <div class="option">
+          <span class="option-letter">a.</span>
+          <span class="option-text">Control Unit (CU)</span>
+          <span class="option-mark"></span>
+        </div>
+        <div class="option correct">
+          <span class="option-letter">b.</span>
+          <span class="option-text">Arithmetic Logic Unit (ALU)</span>
+          <span class="option-mark">— Correct</span>
+        </div>
+        <div class="option">
+          <span class="option-letter">c.</span>
+          <span class="option-text">Memory</span>
+          <span class="option-mark"></span>
+        </div>
+        <div class="option wrong">
+          <span class="option-letter">d.</span>
+          <span class="option-text">Register File</span>
+          <span class="option-mark">— Incorrect</span>
+        </div>
+      </div>
+      <div class="feedback">
+        <strong>Note</strong> The ALU is the part of the CPU that performs arithmetic and logical operations on operands.
+      </div>
+      <div class="actions">
+        <button class="btn">← Previous</button>
+        <button class="btn">Next →</button>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>
