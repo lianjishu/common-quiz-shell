@@ -65,16 +65,16 @@ png = draw_icon(1024)
 png.save('electron/assets/icon.png', 'PNG')
 print('icon.png  1024x1024')
 
-# Various sizes for ICO
-sizes = [16, 24, 32, 48, 64, 128, 256]
-imgs = [draw_icon(s, for_ico=True) for s in sizes]
-imgs[0].save(
+# Various sizes for ICO (electron-builder requires >= 256x256)
+imgs = [draw_icon(s, for_ico=True) for s in [16, 32, 48, 64, 128, 256]]
+# PIL ICO writer: pass largest as primary, rest as append_images
+imgs[-1].save(
     'electron/assets/icon.ico',
     format='ICO',
-    sizes=[(s, s) for s in sizes],
-    append_images=imgs[1:]
+    sizes=[(s, s) for s in [16, 32, 48, 64, 128, 256]],
+    append_images=imgs[:-1]
 )
-print('icon.ico  multi-size')
+print('icon.ico  16..256 multi-size')
 
 # PNG exports
 for s in [256, 128, 64, 32]:
