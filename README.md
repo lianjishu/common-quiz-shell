@@ -2,6 +2,10 @@
 
 一个 350 题的计算机组成原理练习应用，**支持 5 套视觉主题运行时切换**。
 
+提供两种使用方式：
+1. **HTTP 浏览器版** — `unified/`（任何能跑 Python 的环境）
+2. **桌面应用版** — `electron/`（Mac/Win/Linux 原生应用）
+
 ## 快速开始
 
 ### Windows
@@ -14,6 +18,23 @@ cd unified
 ```
 
 > 需要 Python 3.x（任意版本均可）。按 `Ctrl+C` 停止服务。
+
+### 桌面版（Electron）
+
+```sh
+cd electron
+npm install
+npm run dev          # 开发者模式
+npm run build:win    # 打包 Windows 安装包
+npm run build:mac    # 打包 macOS .dmg
+npm run build:linux  # 打包 Linux AppImage
+```
+
+功能：
+- 原生菜单栏（**File / Edit / Theme / View / Help**）
+- 窗口大小/位置自动记忆
+- 主题菜单快捷切换
+- 标准键盘快捷键
 
 ---
 
@@ -40,7 +61,7 @@ cd unified
 ├── README.md              本文档
 ├── .gitignore
 ├── view-in-detail.html    题目详情参考视图
-├── unified/               主项目（多主题服务器版）
+├── unified/               HTTP 浏览器版（多主题服务器版）
 │   ├── index.html         入口 HTML
 │   ├── start.bat / .sh    启动脚本
 │   ├── theme-default.css  极光紫
@@ -51,6 +72,14 @@ cd unified
 │   ├── theme.js           主题切换逻辑
 │   ├── app.js             应用主逻辑
 │   └── questions.js       350 题数据
+├── electron/              桌面应用版（Electron）
+│   ├── main.js            主进程
+│   ├── preload.js         预加载脚本
+│   ├── menu.js            原生菜单
+│   ├── window-state.js    窗口位置持久化
+│   ├── package.json       npm + electron-builder 配置
+│   ├── unified/           复制的网页内容（独立可分发）
+│   └── .gitignore
 └── originals/             源文件存档（5 个原版 HTML + 构建脚本 + 题库文本）
 ```
 
