@@ -2,7 +2,7 @@
 // THEME SWITCHER
 // ============================================
 const THEMES = [
-  { key: 'default', name: '原版',          swatch: '#7C3AED' },
+  { key: 'default', name: '极光紫',        swatch: '#7C3AED' },
   { key: 'style1',  name: '极简线性',      swatch: '#2563EB' },
   { key: 'style2',  name: '新粗野线条',    swatch: '#FFE066' },
   { key: 'style3',  name: '手绘线稿',      swatch: '#D97706' },
@@ -20,7 +20,6 @@ function applyTheme(key) {
   });
   // Update switcher UI
   document.getElementById('theme-label').textContent = theme.name;
-  document.getElementById('theme-dot').style.background = theme.swatch;
   document.querySelectorAll('.theme-option').forEach(opt => {
     opt.classList.toggle('active', opt.dataset.theme === key);
   });
