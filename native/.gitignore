@@ -2,3 +2,8 @@ node_modules/
 dist/
 *.log
 dev-app-update.yml
+
+# npx 占位 stub（PATH 缺 node/npm 时 npx 在 cwd 创建的空文件）
+node
+npm
+*@*.*.*
