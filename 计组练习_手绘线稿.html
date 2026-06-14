@@ -84,7 +84,7 @@ body::after {
 .stats-btn.danger:hover { background: var(--wrong-soft); }
 
 /* Main */
-.main { flex: 1; margin-left: 286px; padding: 32px 48px; display: flex; flex-direction: column; align-items: center; }
+.main { flex: 1; margin-left: 286px; margin-right: 320px; padding: 32px 48px; display: flex; flex-direction: column; align-items: center; }
 
 /* Top bar */
 .top-bar { width: 100%; max-width: 780px; display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
@@ -235,6 +235,59 @@ kbd { font-family: var(--mono); font-size: 12px; padding: 2px 8px; background: v
 ::-webkit-scrollbar-track { background: var(--paper); }
 ::-webkit-scrollbar-thumb { background: var(--ink-2); border-radius: 4px; }
 
+
+/* Answer Sheet (right sidebar) */
+.answer-sheet {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 320px;
+  background: var(--paper-2); border: 2.5px solid var(--ink);
+  border-radius: 6px 22px 8px 26px / 22px 8px 26px 6px;
+  padding: 20px 14px; display: flex; flex-direction: column; gap: 12px;
+  z-index: 100; transform: rotate(-0.4deg); box-shadow: 4px 5px 0 rgba(43,36,23,0.18);
+  margin: 16px 16px 16px 0;
+}
+.sheet-header h3 {
+  font-family: var(--display); font-size: 28px; font-weight: 700;
+  color: var(--orange); margin: 0; line-height: 1;
+  text-decoration: underline; text-decoration-style: wavy; text-decoration-color: var(--orange);
+  text-underline-offset: 5px;
+}
+.sheet-section-header {
+  grid-column: 1 / -1; font-family: var(--display); font-size: 22px; font-weight: 700;
+  color: var(--ink); padding: 12px 2px 4px; display: flex; align-items: baseline; gap: 6px;
+}
+.sheet-section-header:nth-child(odd) { transform: rotate(0.3deg); }
+.sheet-section-header:nth-child(even) { transform: rotate(-0.3deg); }
+.sheet-section-header:first-child { padding-top: 4px; }
+.sheet-section-header .sec-count { font-family: var(--sans); font-size: 14px; color: var(--ink-2); }
+.sheet-section-header.hidden-tile { display: none; }
+
+.sheet-toolbar { display: flex; gap: 4px; flex-wrap: wrap; padding-bottom: 8px; }
+.chip { padding: 4px 12px; background: var(--paper-2); border: 2.5px solid var(--ink); border-radius: 4px 14px 4px 14px; color: var(--ink); font-size: 14px; font-family: var(--sans); cursor: pointer; transition: all 0.12s; box-shadow: 2px 2px 0 rgba(43,36,23,0.2); }
+.chip:hover { transform: translate(-1px, -1px) rotate(-1deg); box-shadow: 3px 3px 0 rgba(43,36,23,0.25); }
+.chip.active { background: var(--orange-soft); }
+
+.sheet-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 4px 2px; }
+.sheet-tile { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-family: var(--display); font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.12s; position: relative; user-select: none; border: 2.5px solid var(--ink); border-radius: 6px 18px 6px 18px; background: var(--paper-2); }
+.sheet-tile:nth-child(even) { border-radius: 18px 6px 18px 6px; }
+.sheet-tile.empty { color: var(--ink-2); border-style: dashed; }
+.sheet-tile.correct { background: var(--correct-soft); border-color: var(--correct); color: var(--correct); }
+.sheet-tile.wrong { background: var(--wrong-soft); border-color: var(--wrong); color: var(--wrong); }
+.sheet-tile.current { background: var(--orange); border-color: var(--ink); color: var(--paper); transform: scale(1.1); z-index: 2; box-shadow: 3px 3px 0 rgba(43,36,23,0.3); }
+.sheet-tile.hidden-tile { opacity: 0.18; pointer-events: none; filter: grayscale(1); }
+.sheet-tile:hover:not(.current):not(.hidden-tile) { transform: rotate(0deg) scale(1.05); }
+.sheet-tile.correct::after, .sheet-tile.wrong::after { content: ''; position: absolute; bottom: 3px; right: 3px; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.sheet-tile.current::after { content: ''; position: absolute; bottom: 3px; right: 3px; width: 5px; height: 5px; border-radius: 50%; background: var(--paper); }
+.sheet-tile.empty::after { display: none; }
+
+.sheet-legend { display: flex; gap: 10px; font-size: 12px; color: var(--ink-2); padding-top: 6px; flex-wrap: wrap; }
+.sheet-legend span { display: flex; align-items: center; gap: 4px; }
+.sheet-legend i { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--ink); border-radius: 4px; }
+.sheet-legend i.lg-empty { background: var(--paper-2); border-style: dashed; }
+.sheet-legend i.lg-correct { background: var(--correct-soft); border-color: var(--correct); }
+.sheet-legend i.lg-wrong { background: var(--wrong-soft); border-color: var(--wrong); }
+
+@media (max-width: 1100px) { .answer-sheet { display: none; } .main { margin-right: 0 !important; } }
+
 </style>
 </head>
 <body>
@@ -301,6 +354,25 @@ kbd { font-family: var(--mono); font-size: 12px; padding: 2px 8px; background: v
       <span><kbd>Space</kbd> 显示答案(简答)</span>
     </div>
   </main>
+
+  <aside class="answer-sheet">
+    <div class="sheet-header">
+      <h3>// 答题卡 Answer Sheet</h3>
+    </div>
+    <div class="sheet-toolbar" id="sheet-toolbar">
+      <button class="chip active" data-type="all">全部</button>
+      <button class="chip" data-type="单选题">单选</button>
+      <button class="chip" data-type="填空题">填空</button>
+      <button class="chip" data-type="判断题">判断</button>
+      <button class="chip" data-type="简答题">简答</button>
+    </div>
+    <div class="sheet-grid" id="sheet-grid"></div>
+    <div class="sheet-legend">
+      <span><i class="lg-empty"></i>未答</span>
+      <span><i class="lg-correct"></i>正确</span>
+      <span><i class="lg-wrong"></i>错误</span>
+    </div>
+  </aside>
 </div>
 
 <script>
@@ -437,6 +509,7 @@ function renderQuestion() {
   card.innerHTML = html;
   updateProgress();
   updateSidebar();
+  highlightCurrentTile();
 
   // Restore answered state
   if (answered && q.type !== '简答题') {
@@ -708,6 +781,7 @@ function updateSidebar() {
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.filter === currentFilter);
   });
+  updateSheet();
 }
 
 function resetProgress() {
@@ -758,8 +832,78 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 });
 
 // ============================================
+
+// ============================================
+// ANSWER SHEET
+// ============================================
+function renderAnswerSheet() {
+  const grid = document.getElementById('sheet-grid');
+  if (!grid) return;
+
+  const groups = {};
+  questions.forEach(q => {
+    if (!groups[q.type]) groups[q.type] = [];
+    groups[q.type].push(q);
+  });
+
+  const typeOrder = ['单选题', '填空题', '判断题', '简答题'];
+  let html = '';
+  typeOrder.forEach(type => {
+    if (!groups[type] || groups[type].length === 0) return;
+    html += `<div class="sheet-section-header" data-type="${type}">${type}<span class="sec-count">×${groups[type].length}</span></div>`;
+    html += groups[type].map(q => {
+      const state = progress[q.id];
+      let cls = 'sheet-tile empty';
+      if (state?.result === 'correct') cls = 'sheet-tile correct';
+      else if (state?.result === 'wrong') cls = 'sheet-tile wrong';
+      return `<div class="${cls}" data-id="${q.id}" data-type="${q.type}" onclick="goToQuestion(${q.id})" title="#${q.id} · ${q.type}">${String(q.id).padStart(3, '0')}</div>`;
+    }).join('');
+  });
+  grid.innerHTML = html;
+}
+
+function updateSheet() {
+  const tiles = document.querySelectorAll('.sheet-tile');
+  tiles.forEach(t => {
+    const id = parseInt(t.dataset.id);
+    const state = progress[id];
+    t.classList.remove('empty', 'correct', 'wrong', 'essay');
+    if (state?.result === 'correct') t.classList.add('correct');
+    else if (state?.result === 'wrong') t.classList.add('wrong');
+    else t.classList.add('empty');
+  });
+}
+
+function highlightCurrentTile() {
+  const cur = filteredIds[currentIndex];
+  if (cur === undefined) return;
+  document.querySelectorAll('.sheet-tile.current').forEach(t => t.classList.remove('current'));
+  const tile = document.querySelector(`.sheet-tile[data-id="${cur}"]`);
+  if (tile) {
+    tile.classList.add('current');
+    tile.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+}
+
+document.querySelectorAll('#sheet-toolbar .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#sheet-toolbar .chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const type = chip.dataset.type;
+    document.querySelectorAll('.sheet-tile').forEach(t => {
+      const hide = type !== 'all' && t.dataset.type !== type;
+      t.classList.toggle('hidden-tile', hide);
+    });
+    document.querySelectorAll('.sheet-section-header').forEach(h => {
+      const hide = type !== 'all' && h.dataset.type !== type;
+      h.classList.toggle('hidden-tile', hide);
+    });
+  });
+});
+
 // INIT
 // ============================================
+renderAnswerSheet();
 updateSidebar();
 renderQuestion();
 </script>

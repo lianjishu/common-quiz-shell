@@ -84,7 +84,7 @@ body::after {
 .stats-btn.danger:hover { background: var(--red); color: var(--paper); }
 
 /* Main */
-.main { flex: 1; margin-left: 276px; padding: 32px 48px; display: flex; flex-direction: column; align-items: center; }
+.main { flex: 1; margin-left: 276px; margin-right: 340px; padding: 32px 48px; display: flex; flex-direction: column; align-items: center; }
 
 /* Top bar */
 .top-bar { width: 100%; max-width: 780px; display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
@@ -233,6 +233,55 @@ kbd { font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 3px 
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--ink); }
 
+
+/* Answer Sheet (right sidebar) */
+.answer-sheet {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 340px;
+  background: var(--paper); border-left: 3px solid var(--ink);
+  padding: 20px 14px; display: flex; flex-direction: column; gap: 14px;
+  z-index: 100; box-shadow: -6px 0 0 var(--ink);
+}
+.sheet-header h3 {
+  font-family: var(--display); font-size: 12px; color: var(--ink);
+  font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 6px 10px; background: var(--accent); border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--red);
+}
+.sheet-section-header {
+  grid-column: 1 / -1; font-family: var(--display); font-size: 14px; font-weight: 700;
+  color: var(--ink); text-transform: uppercase; letter-spacing: 0.05em;
+  padding: 14px 2px 6px; display: flex; align-items: baseline; gap: 6px;
+  border-bottom: 2px dashed var(--ink);
+}
+.sheet-section-header:first-child { padding-top: 4px; }
+.sheet-section-header .sec-count { font-family: var(--mono); font-size: 11px; color: var(--ink); }
+.sheet-section-header.hidden-tile { display: none; }
+
+.sheet-toolbar { display: flex; gap: 4px; flex-wrap: wrap; padding-bottom: 10px; }
+.chip { padding: 5px 10px; background: var(--paper); border: 3px solid var(--ink); color: var(--ink); font-size: 11px; font-family: var(--display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer; box-shadow: 3px 3px 0 var(--ink); transition: all 0.08s; }
+.chip:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+.chip.active { background: var(--accent); transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
+
+.sheet-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 4px 2px; }
+.sheet-tile { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.08s; position: relative; user-select: none; border: 3px solid var(--ink); }
+.sheet-tile.empty { background: var(--bg); color: var(--ink); border-style: dashed; }
+.sheet-tile.correct { background: var(--green); color: var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+.sheet-tile.wrong { background: var(--pink); color: var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+.sheet-tile.current { background: var(--accent); color: var(--ink); transform: scale(1.1); box-shadow: 5px 5px 0 var(--ink); z-index: 2; }
+.sheet-tile.hidden-tile { opacity: 0.18; pointer-events: none; filter: grayscale(1); }
+.sheet-tile:hover:not(.current):not(.hidden-tile) { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--ink); }
+.sheet-tile.correct::after, .sheet-tile.wrong::after, .sheet-tile.current::after { content: ''; position: absolute; bottom: 3px; right: 3px; width: 5px; height: 5px; border-radius: 50%; background: var(--ink); }
+.sheet-tile.empty::after { display: none; }
+
+.sheet-legend { display: flex; gap: 10px; font-size: 10px; color: var(--ink); padding-top: 8px; font-family: var(--display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.sheet-legend span { display: flex; align-items: center; gap: 4px; }
+.sheet-legend i { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--ink); }
+.sheet-legend i.lg-empty { background: var(--bg); border-style: dashed; }
+.sheet-legend i.lg-correct { background: var(--green); }
+.sheet-legend i.lg-wrong { background: var(--pink); }
+
+@media (max-width: 1100px) { .answer-sheet { display: none; } .main { margin-right: 0 !important; } }
+
 </style>
 </head>
 <body>
@@ -299,6 +348,25 @@ kbd { font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 3px 
       <span><kbd>Space</kbd> 显示答案(简答)</span>
     </div>
   </main>
+
+  <aside class="answer-sheet">
+    <div class="sheet-header">
+      <h3>// 答题卡 Answer Sheet</h3>
+    </div>
+    <div class="sheet-toolbar" id="sheet-toolbar">
+      <button class="chip active" data-type="all">全部</button>
+      <button class="chip" data-type="单选题">单选</button>
+      <button class="chip" data-type="填空题">填空</button>
+      <button class="chip" data-type="判断题">判断</button>
+      <button class="chip" data-type="简答题">简答</button>
+    </div>
+    <div class="sheet-grid" id="sheet-grid"></div>
+    <div class="sheet-legend">
+      <span><i class="lg-empty"></i>未答</span>
+      <span><i class="lg-correct"></i>正确</span>
+      <span><i class="lg-wrong"></i>错误</span>
+    </div>
+  </aside>
 </div>
 
 <script>
@@ -435,6 +503,7 @@ function renderQuestion() {
   card.innerHTML = html;
   updateProgress();
   updateSidebar();
+  highlightCurrentTile();
 
   // Restore answered state
   if (answered && q.type !== '简答题') {
@@ -706,6 +775,7 @@ function updateSidebar() {
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.filter === currentFilter);
   });
+  updateSheet();
 }
 
 function resetProgress() {
@@ -756,8 +826,78 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 });
 
 // ============================================
+
+// ============================================
+// ANSWER SHEET
+// ============================================
+function renderAnswerSheet() {
+  const grid = document.getElementById('sheet-grid');
+  if (!grid) return;
+
+  const groups = {};
+  questions.forEach(q => {
+    if (!groups[q.type]) groups[q.type] = [];
+    groups[q.type].push(q);
+  });
+
+  const typeOrder = ['单选题', '填空题', '判断题', '简答题'];
+  let html = '';
+  typeOrder.forEach(type => {
+    if (!groups[type] || groups[type].length === 0) return;
+    html += `<div class="sheet-section-header" data-type="${type}">${type}<span class="sec-count">×${groups[type].length}</span></div>`;
+    html += groups[type].map(q => {
+      const state = progress[q.id];
+      let cls = 'sheet-tile empty';
+      if (state?.result === 'correct') cls = 'sheet-tile correct';
+      else if (state?.result === 'wrong') cls = 'sheet-tile wrong';
+      return `<div class="${cls}" data-id="${q.id}" data-type="${q.type}" onclick="goToQuestion(${q.id})" title="#${q.id} · ${q.type}">${String(q.id).padStart(3, '0')}</div>`;
+    }).join('');
+  });
+  grid.innerHTML = html;
+}
+
+function updateSheet() {
+  const tiles = document.querySelectorAll('.sheet-tile');
+  tiles.forEach(t => {
+    const id = parseInt(t.dataset.id);
+    const state = progress[id];
+    t.classList.remove('empty', 'correct', 'wrong', 'essay');
+    if (state?.result === 'correct') t.classList.add('correct');
+    else if (state?.result === 'wrong') t.classList.add('wrong');
+    else t.classList.add('empty');
+  });
+}
+
+function highlightCurrentTile() {
+  const cur = filteredIds[currentIndex];
+  if (cur === undefined) return;
+  document.querySelectorAll('.sheet-tile.current').forEach(t => t.classList.remove('current'));
+  const tile = document.querySelector(`.sheet-tile[data-id="${cur}"]`);
+  if (tile) {
+    tile.classList.add('current');
+    tile.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+}
+
+document.querySelectorAll('#sheet-toolbar .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#sheet-toolbar .chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const type = chip.dataset.type;
+    document.querySelectorAll('.sheet-tile').forEach(t => {
+      const hide = type !== 'all' && t.dataset.type !== type;
+      t.classList.toggle('hidden-tile', hide);
+    });
+    document.querySelectorAll('.sheet-section-header').forEach(h => {
+      const hide = type !== 'all' && h.dataset.type !== type;
+      h.classList.toggle('hidden-tile', hide);
+    });
+  });
+});
+
 // INIT
 // ============================================
+renderAnswerSheet();
 updateSidebar();
 renderQuestion();
 </script>
