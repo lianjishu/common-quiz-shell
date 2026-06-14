@@ -784,35 +784,40 @@ kbd {
   border-bottom: 1px solid var(--border);
 }
 
-.sheet-summary {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-  font-size: 11px;
-  color: var(--text-secondary);
-}
-
-.sheet-summary span {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 6px 4px;
-  background: var(--bg-main);
-  border-radius: 6px;
-  border: 1px solid var(--border);
-}
-
-.sheet-summary b {
+.sheet-section-header {
+  grid-column: 1 / -1;
   font-family: var(--mono);
-  font-size: 16px;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+  padding: 14px 2px 6px;
   font-weight: 600;
-  color: var(--text);
-  line-height: 1.2;
-  margin-bottom: 2px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
 }
 
-.sheet-summary span:nth-child(2) b { color: var(--tile-correct); }
-.sheet-summary span:nth-child(3) b { color: var(--tile-wrong); }
+.sheet-section-header:first-child {
+  padding-top: 4px;
+}
+
+.sheet-section-header .sec-count {
+  font-size: 9.5px;
+  color: var(--text-dim);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.sheet-section-header::before {
+  content: '//';
+  color: var(--text-dim);
+  font-weight: 400;
+  margin-right: 2px;
+}
+
+.sheet-section-header.hidden-tile {
+  display: none;
+}
 
 .sheet-toolbar {
   display: flex;
@@ -964,7 +969,6 @@ kbd {
 .sheet-legend i.lg-empty { background: var(--tile-empty-bg); border: 1px dashed var(--sheet-border); }
 .sheet-legend i.lg-correct { background: var(--tile-correct); }
 .sheet-legend i.lg-wrong { background: var(--tile-wrong); }
-.sheet-legend i.lg-essay { background: var(--bg-main); border: 1px solid var(--border-accent); }
 
 @media (max-width: 1100px) {
   .answer-sheet { display: none; }
@@ -1040,11 +1044,6 @@ kbd {
   <aside class="answer-sheet">
     <div class="sheet-header">
       <h3>// 答题卡 Answer Sheet</h3>
-      <div class="sheet-summary">
-        <span><b id="sheet-done">0</b>已做</span>
-        <span><b id="sheet-correct">0</b>正确</span>
-        <span><b id="sheet-wrong">0</b>错误</span>
-      </div>
     </div>
     <div class="sheet-toolbar" id="sheet-toolbar">
       <button class="chip active" data-type="all">全部</button>
@@ -1058,7 +1057,6 @@ kbd {
       <span><i class="lg-empty"></i>未答</span>
       <span><i class="lg-correct"></i>正确</span>
       <span><i class="lg-wrong"></i>错误</span>
-      <span><i class="lg-essay"></i>简答</span>
     </div>
   </aside>
 </div>
@@ -1527,44 +1525,40 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 function renderAnswerSheet() {
   const grid = document.getElementById('sheet-grid');
   if (!grid) return;
-  grid.innerHTML = questions.map(q => {
-    const state = progress[q.id];
-    let cls = 'sheet-tile empty';
-    if (state) {
-      if (state.result === 'correct') cls = 'sheet-tile correct';
-      else if (state.result === 'wrong') cls = 'sheet-tile wrong';
-      else if (q.type === '简答题') cls = 'sheet-tile essay';
-      else cls = 'sheet-tile';
-    } else if (q.type === '简答题') {
-      cls = 'sheet-tile empty';
-    }
-    return `<div class="${cls}" data-id="${q.id}" data-type="${q.type}" onclick="goToQuestion(${q.id})" title="#${q.id} · ${q.type}">${String(q.id).padStart(3, '0')}</div>`;
-  }).join('');
+
+  // Group questions by type
+  const groups = {};
+  questions.forEach(q => {
+    if (!groups[q.type]) groups[q.type] = [];
+    groups[q.type].push(q);
+  });
+
+  const typeOrder = ['单选题', '填空题', '判断题', '简答题'];
+  let html = '';
+  typeOrder.forEach(type => {
+    if (!groups[type] || groups[type].length === 0) return;
+    html += `<div class="sheet-section-header" data-type="${type}">${type}<span class="sec-count">×${groups[type].length}</span></div>`;
+    html += groups[type].map(q => {
+      const state = progress[q.id];
+      let cls = 'sheet-tile empty';
+      if (state?.result === 'correct') cls = 'sheet-tile correct';
+      else if (state?.result === 'wrong') cls = 'sheet-tile wrong';
+      return `<div class="${cls}" data-id="${q.id}" data-type="${q.type}" onclick="goToQuestion(${q.id})" title="#${q.id} · ${q.type}">${String(q.id).padStart(3, '0')}</div>`;
+    }).join('');
+  });
+  grid.innerHTML = html;
 }
 
 function updateSheet() {
   const tiles = document.querySelectorAll('.sheet-tile');
-  let done = 0, correct = 0, wrong = 0;
   tiles.forEach(t => {
     const id = parseInt(t.dataset.id);
-    const q = getQuestionById(id);
     const state = progress[id];
     t.classList.remove('empty', 'correct', 'wrong', 'essay');
-    if (state) {
-      if (state.result === 'correct') { t.classList.add('correct'); done++; correct++; }
-      else if (state.result === 'wrong') { t.classList.add('wrong'); done++; wrong++; }
-      else if (q.type === '简答题') { t.classList.add('essay'); done++; }
-      else { t.classList.add('empty'); }
-    } else {
-      t.classList.add('empty');
-    }
+    if (state?.result === 'correct') t.classList.add('correct');
+    else if (state?.result === 'wrong') t.classList.add('wrong');
+    else t.classList.add('empty');
   });
-  const dEl = document.getElementById('sheet-done');
-  const cEl = document.getElementById('sheet-correct');
-  const wEl = document.getElementById('sheet-wrong');
-  if (dEl) dEl.textContent = done;
-  if (cEl) cEl.textContent = correct;
-  if (wEl) wEl.textContent = wrong;
 }
 
 function highlightCurrentTile() {
@@ -1587,6 +1581,10 @@ document.querySelectorAll('#sheet-toolbar .chip').forEach(chip => {
     document.querySelectorAll('.sheet-tile').forEach(t => {
       const hide = type !== 'all' && t.dataset.type !== type;
       t.classList.toggle('hidden-tile', hide);
+    });
+    document.querySelectorAll('.sheet-section-header').forEach(h => {
+      const hide = type !== 'all' && h.dataset.type !== type;
+      h.classList.toggle('hidden-tile', hide);
     });
   });
 });
