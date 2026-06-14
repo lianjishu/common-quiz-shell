@@ -3,17 +3,17 @@
 一个 350 题的计算机组成原理练习应用，**支持 5 套视觉主题运行时切换**。
 
 提供两种使用方式：
-1. **HTTP 浏览器版** — `unified/`（任何能跑 Python 的环境）
-2. **桌面应用版** — `electron/`（Mac/Win/Linux 原生应用）
+1. **HTTP 浏览器版** — `web/`（任何能跑 Python 的环境）
+2. **桌面应用版** — `native/`（Mac/Win/Linux 原生应用）
 
 ## 快速开始
 
 ### Windows
-双击 `unified/start.bat`，浏览器自动打开 `http://localhost:8000/index.html`
+双击 `web/start.bat`，浏览器自动打开 `http://localhost:8000/index.html`
 
 ### macOS / Linux
 ```sh
-cd unified
+cd web
 ./start.sh
 ```
 
@@ -22,7 +22,7 @@ cd unified
 ### 桌面版（Electron）
 
 ```sh
-cd electron
+cd native
 npm install
 npm run dev          # 开发者模式
 npm run build:win    # 打包 Windows 安装包
@@ -60,8 +60,7 @@ npm run build:linux  # 打包 Linux AppImage
 计组/
 ├── README.md              本文档
 ├── .gitignore
-├── view-in-detail.html    题目详情参考视图
-├── unified/               HTTP 浏览器版（多主题服务器版）
+├── web/                   HTTP 浏览器版（多主题服务器版）
 │   ├── index.html         入口 HTML
 │   ├── start.bat / .sh    启动脚本
 │   ├── theme-default.css  极光紫
@@ -72,7 +71,7 @@ npm run build:linux  # 打包 Linux AppImage
 │   ├── theme.js           主题切换逻辑
 │   ├── app.js             应用主逻辑
 │   └── questions.js       350 题数据
-├── electron/              桌面应用版（Electron）
+├── native/                桌面应用版（Electron）
 │   ├── main.js            主进程
 │   ├── preload.js         预加载脚本
 │   ├── menu.js            原生菜单
@@ -80,7 +79,7 @@ npm run build:linux  # 打包 Linux AppImage
 │   ├── package.json       npm + electron-builder 配置
 │   ├── unified/           复制的网页内容（独立可分发）
 │   └── .gitignore
-└── originals/             源文件存档（5 个原版 HTML + 构建脚本 + 题库文本）
+└── backup/                源文件存档（5 个原版 HTML + 构建脚本 + 题库文本 + 参考视图）
 ```
 
 ---
@@ -114,17 +113,17 @@ npm run build:linux  # 打包 Linux AppImage
 
 ### 如何添加新主题
 
-1. 复制 `unified/theme-style1.css` 为 `theme-style5.css`
+1. 复制 `web/theme-style1.css` 为 `theme-style5.css`
 2. 修改 `:root` CSS 变量和组件样式
-3. 编辑 `unified/index.html`，在 `<link id="theme-link">` 无需修改（JS 会动态改 href）
-4. 编辑 `unified/theme.js`，在 `THEMES` 数组添加新主题配置：
+3. 编辑 `web/index.html`，在 `<link id="theme-link">` 无需修改（JS 会动态改 href）
+4. 编辑 `web/theme.js`，在 `THEMES` 数组添加新主题配置：
    ```js
    { key: 'style5', name: '新主题名', file: 'theme-style5.css' }
    ```
 
 ### 如何更新题库
 
-350 题数据在 `unified/questions.js` 的 `MARKDOWN_DATA` 数组中。
+350 题数据在 `web/questions.js` 的 `MARKDOWN_DATA` 数组中。
 每题结构：
 ```js
 { id: 1, type: "单选题", points: 0.2, question: "...", answer: "A", options: ["A. ...", "B. ...", ...] }
@@ -137,7 +136,7 @@ npm run build:linux  # 打包 Linux AppImage
 
 ### 主题切换实现
 
-`unified/index.html` 用单个 `<link id="theme-link">`，`theme.js` 通过修改 `link.href` 加载对应 CSS 并加上 `?v=时间戳` 防止浏览器缓存。主题偏好存到 `localStorage.quiz-theme`。
+`web/index.html` 用单个 `<link id="theme-link">`，`theme.js` 通过修改 `link.href` 加载对应 CSS 并加上 `?v=时间戳` 防止浏览器缓存。主题偏好存到 `localStorage.quiz-theme`。
 
 ---
 
