@@ -152,8 +152,9 @@
         break;
       case 'error':
         hideProgress();
-        showUpdaterToast('更新失败，请稍后重试');
-        console.error('[updater]', p.message);
+        // auto-check 在未发布 release 时返回 404，是预期的"暂无更新"场景。
+        // 不打扰用户，错误留 console + electron-log 供排查。
+        console.warn('[updater auto-check]', p.message);
         break;
       case 'checking':
         break;

@@ -139,7 +139,7 @@ GITEE_TOKEN=xxx npm run release
 - **统计面板**：已做 / 正确 / 错误 / 正确率
 - **进度保存**：`localStorage` 持久化答题进度
 - **主题切换**：5 套主题运行时切换，偏好持久化
-- **桌面版自动更新**：启动后调 `electron-updater` 拉 Gitee Release，发现新版本弹 toast，确认后下载 + 重启安装
+- **桌面版自动更新**：启动后调 `electron-updater` 拉 Gitee Release，发现新版本弹 toast，确认后下载 + 重启安装；未发布 release 时的 404 仅记日志，不弹窗
 - **键盘快捷键**：
   - `←` `→` 切换题目
   - `Enter` 下一题 / 提交
