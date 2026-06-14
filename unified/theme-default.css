@@ -1,7 +1,3 @@
-/* ==========================================================
-   base.css  --  Component & layout styles (theme-agnostic)
-   ========================================================== */
-
 :root {
   --bg-deep: #FAF5FF;
   --bg-main: #F7F3FD;
@@ -67,8 +63,6 @@ body::after {
   overflow-y: auto;
   z-index: 100;
 }
-
-/* 主题宽度覆盖 -- moved to theme.css */
 
 .sidebar h1 {
   font-family: var(--mono);
@@ -798,18 +792,18 @@ kbd {
   padding-top: 4px;
 }
 
-.sheet-section-header .sec-count {
-  font-size: 9.5px;
-  color: var(--text-dim);
-  font-weight: 400;
-  letter-spacing: 0;
-}
-
 .sheet-section-header::before {
   content: '//';
   color: var(--text-dim);
   font-weight: 400;
   margin-right: 2px;
+}
+
+.sheet-section-header .sec-count {
+  font-size: 9.5px;
+  color: var(--text-dim);
+  font-weight: 400;
+  letter-spacing: 0;
 }
 
 .sheet-section-header.hidden-tile {
