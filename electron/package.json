@@ -24,14 +24,17 @@
       "package.json"
     ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "assets/icon.ico"
     },
     "mac": {
       "target": "dmg",
+      "icon": "assets/icon.png",
       "category": "public.app-category.education"
     },
     "linux": {
-      "target": "AppImage"
+      "target": "AppImage",
+      "icon": "assets/icon.png"
     }
   },
   "devDependencies": {

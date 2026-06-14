@@ -15,6 +15,7 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     title: '计组练习',
+    icon: path.join(__dirname, 'assets/icon.png'),
     backgroundColor: '#ffffff',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
