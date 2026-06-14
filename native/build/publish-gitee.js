@@ -5,7 +5,8 @@
  * 流程：
  *   1. 调用 electron-builder 构建 Windows 安装包（不动 publish）
  *   2. 找到或创建 tag="latest" 的 Gitee Release
- *   3. 上传 dist/latest.yml + dist/*.exe + dist/*.exe.blockmap 到该 Release
+ *   3. 清空 Release 现有附件（避免重复堆积）
+ *   4. 上传 dist/latest*.yml + dist/*.exe + dist/*.exe.blockmap 到该 Release
  *
  * 用法：
  *   GITEE_TOKEN=xxx npm run release
@@ -146,9 +147,12 @@ function runBuild() {
       throw new Error(`dist/ 目录不存在：${DIST}`);
     }
 
-    const candidates = fs.readdirSync(DIST).filter(f =>
-      /\.(yml|exe|blockmap)$/i.test(f) && !f.endsWith('.blockmap.check')
-    );
+    const candidates = fs.readdirSync(DIST).filter(f => {
+      if (f.endsWith('.blockmap.check')) return false;
+      if (/\.(exe|blockmap)$/i.test(f)) return true;
+      if (/^latest(-[a-z]+)?\.yml$/i.test(f)) return true;
+      return false;
+    });
     if (candidates.length === 0) {
       throw new Error(`dist/ 中未找到 .yml/.exe/.blockmap 文件`);
     }
@@ -169,6 +173,14 @@ function runBuild() {
       });
       console.log(`  ✓ 已创建 Release: ${release.name} (id=${release.id})`);
     }
+
+    console.log(`▶ 清空 Release 现有附件...`);
+    const fullRelease = await api('GET', `/api/v5/repos/${OWNER}/${REPO}/releases/${release.id}`);
+    const oldAssets = fullRelease.assets || [];
+    for (const asset of oldAssets) {
+      await api('DELETE', `/api/v5/repos/${OWNER}/${REPO}/releases/${release.id}/attach_files/${asset.id}`);
+    }
+    console.log(`  ↻ 已删除 ${oldAssets.length} 个旧附件`);
 
     console.log(`▶ 上传产物到 Release...`);
     for (const file of candidates) {
