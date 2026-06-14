@@ -13,7 +13,12 @@ const KEY_THEME = 'quiz-theme';
 function applyTheme(key) {
   const theme = THEMES.find(t => t.key === key);
   if (!theme) return;
-  document.body.dataset.theme = key;
+  // Enable/disable theme CSS files
+  THEMES.forEach(t => {
+    const link = document.getElementById('theme-' + t.key);
+    if (link) link.disabled = (t.key !== key);
+  });
+  // Update switcher UI
   document.getElementById('theme-label').textContent = theme.name;
   document.getElementById('theme-dot').style.background = theme.swatch;
   document.querySelectorAll('.theme-option').forEach(opt => {
