@@ -73,6 +73,16 @@ body::after {
   z-index: 100;
 }
 
+/* 主题宽度覆盖 */
+[data-theme="style1"] .sidebar { width: 260px; }
+[data-theme="style2"] .sidebar { width: 276px; }
+[data-theme="style3"] .sidebar { width: 286px; }
+[data-theme="style4"] .sidebar { width: 240px; }
+[data-theme="style1"] .main { margin-left: 260px; }
+[data-theme="style2"] .main { margin-left: 276px; }
+[data-theme="style3"] .main { margin-left: 286px; }
+[data-theme="style4"] .main { margin-left: 240px; }
+
 .sidebar h1 {
   font-family: var(--mono);
   font-size: 14px;
