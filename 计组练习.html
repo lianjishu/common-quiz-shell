@@ -71,51 +71,7 @@ body::after {
   bottom: 0;
   overflow-y: auto;
   z-index: 100;
-  transition: width 0.25s ease, padding 0.25s ease;
 }
-
-.sidebar.collapsed {
-  width: 0;
-  padding: 0;
-  border-right: none;
-  overflow: hidden;
-}
-
-.sidebar.collapsed > * { display: none; }
-.sidebar.collapsed .sidebar-toggle { display: flex; }
-
-.sidebar-toggle, .sheet-toggle {
-  position: absolute;
-  top: 12px;
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  font-family: var(--mono);
-  font-size: 14px;
-  line-height: 1;
-  z-index: 110;
-  transition: all 0.15s ease;
-  padding: 0;
-}
-
-.sidebar-toggle { right: 12px; }
-.sheet-toggle { left: 12px; }
-
-.sidebar-toggle:hover, .sheet-toggle:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--bg-card-hover);
-}
-
-body.left-collapsed .main { margin-left: 0 !important; }
-body.right-collapsed .main { margin-right: 0 !important; }
 
 .sidebar h1 {
   font-family: var(--mono);
@@ -815,19 +771,7 @@ kbd {
   gap: 14px;
   z-index: 100;
   box-shadow: -2px 0 12px rgba(124,58,237,0.04);
-  transition: width 0.25s ease, padding 0.25s ease;
 }
-
-.answer-sheet.collapsed {
-  width: 0;
-  padding: 0;
-  border-left: none;
-  box-shadow: none;
-  overflow: hidden;
-}
-
-.answer-sheet.collapsed > *:not(.sheet-toggle) { display: none; }
-.answer-sheet.collapsed .sheet-toggle { display: flex; }
 
 .sheet-header h3 {
   font-family: var(--mono);
@@ -1030,47 +974,12 @@ kbd {
   .answer-sheet { display: none; }
   .main { margin-right: 0 !important; }
 }
-
-/* Floating toggle buttons when sidebar is collapsed */
-.sidebar.collapsed .sidebar-toggle,
-.answer-sheet.collapsed .sheet-toggle {
-  position: fixed;
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--bg-card);
-  box-shadow: 0 2px 8px rgba(124,58,237,0.12);
-  width: 28px;
-  height: 56px;
-  border-radius: 0 8px 8px 0;
-  font-size: 16px;
-}
-.sidebar.collapsed .sidebar-toggle {
-  left: 0;
-  border-left: none;
-}
-.answer-sheet.collapsed .sheet-toggle {
-  right: 0;
-  border-right: none;
-  border-radius: 8px 0 0 8px;
-}
-.sidebar.collapsed .sidebar-toggle svg,
-.answer-sheet.collapsed .sheet-toggle svg { display: block; }
-.sidebar.collapsed .sidebar-toggle .icon-collapse,
-.answer-sheet.collapsed .sheet-toggle .icon-expand { display: none; }
-.sidebar-toggle .icon-expand,
-.sheet-toggle .icon-collapse { display: none; }
-.sidebar.collapsed .sidebar-toggle .icon-expand,
-.answer-sheet.collapsed .sheet-toggle .icon-collapse { display: block; }
 </style>
 </head>
 <body>
 
 <div class="app">
   <aside class="sidebar">
-    <button class="sidebar-toggle" id="left-toggle" aria-label="折叠侧边栏">
-      <svg class="icon-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M15 18l-6-6 6-6"/></svg>
-      <svg class="icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 6l6 6-6 6"/></svg>
-    </button>
     <h1>
       计组 · 模拟题
       <span>Computer Organization Quiz</span>
@@ -1133,10 +1042,6 @@ kbd {
   </main>
 
   <aside class="answer-sheet">
-    <button class="sheet-toggle" id="right-toggle" aria-label="折叠答题卡">
-      <svg class="icon-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 6l6 6-6 6"/></svg>
-      <svg class="icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M15 18l-6-6 6-6"/></svg>
-    </button>
     <div class="sheet-header">
       <h3>// 答题卡 Answer Sheet</h3>
     </div>
@@ -1685,40 +1590,8 @@ document.querySelectorAll('#sheet-toolbar .chip').forEach(chip => {
 });
 
 // ============================================
-// SIDEBAR COLLAPSE
-// ============================================
-const KEY_LEFT = 'sidebar-left-collapsed';
-const KEY_RIGHT = 'sidebar-right-collapsed';
-
-function applyCollapse() {
-  const l = JSON.parse(localStorage.getItem(KEY_LEFT) || 'false');
-  const r = JSON.parse(localStorage.getItem(KEY_RIGHT) || 'false');
-  document.querySelector('.sidebar').classList.toggle('collapsed', l);
-  document.querySelector('.answer-sheet').classList.toggle('collapsed', r);
-  document.body.classList.toggle('left-collapsed', l);
-  document.body.classList.toggle('right-collapsed', r);
-}
-
-document.getElementById('left-toggle').addEventListener('click', () => {
-  const sb = document.querySelector('.sidebar');
-  const next = !sb.classList.contains('collapsed');
-  sb.classList.toggle('collapsed', next);
-  document.body.classList.toggle('left-collapsed', next);
-  localStorage.setItem(KEY_LEFT, JSON.stringify(next));
-});
-
-document.getElementById('right-toggle').addEventListener('click', () => {
-  const sh = document.querySelector('.answer-sheet');
-  const next = !sh.classList.contains('collapsed');
-  sh.classList.toggle('collapsed', next);
-  document.body.classList.toggle('right-collapsed', next);
-  localStorage.setItem(KEY_RIGHT, JSON.stringify(next));
-});
-
-// ============================================
 // INIT
 // ============================================
-applyCollapse();
 renderAnswerSheet();
 updateSidebar();
 renderQuestion();
