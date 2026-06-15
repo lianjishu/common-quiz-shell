@@ -42,6 +42,18 @@ if (!isDev) {
 let mainWindow;
 let menuCheckInProgress = false;
 
+function isNewerVersion(remote, local) {
+  if (!remote || !local) return false;
+  const toParts = v => String(v).replace(/^v/i, '').split('.').map(s => parseInt(s, 10) || 0);
+  const r = toParts(remote);
+  const l = toParts(local);
+  for (let i = 0; i < Math.max(r.length, l.length); i++) {
+    if ((r[i] || 0) > (l[i] || 0)) return true;
+    if ((r[i] || 0) < (l[i] || 0)) return false;
+  }
+  return false;
+}
+
 function runUpdateCheck(win, { silent = true } = {}) {
   if (!autoUpdater) {
     if (!silent) {
@@ -65,19 +77,23 @@ function runUpdateCheck(win, { silent = true } = {}) {
       const localV = app.getVersion();
       if (result && result.updateInfo) {
         const v = result.updateInfo.version;
-        return dialog.showMessageBox(win, {
-          type: 'info', title: '发现新版本',
-          message: `发现新版本 v${v}`,
-          detail: `当前版本: v${localV}\n是否立即下载并安装？`,
-          buttons: ['下载', '稍后再说'],
-          defaultId: 0, cancelId: 1
-        }).then(({ response }) => {
-          if (response === 0) autoUpdater.downloadUpdate();
-        });
+        if (isNewerVersion(v, localV)) {
+          return dialog.showMessageBox(win, {
+            type: 'info', title: '发现新版本',
+            message: `发现新版本 v${v}`,
+            detail: `当前版本: v${localV}\n是否立即下载并安装？`,
+            buttons: ['下载', '稍后再说'],
+            defaultId: 0, cancelId: 1
+          }).then(({ response }) => {
+            if (response === 0) autoUpdater.downloadUpdate();
+          });
+        }
+        log.info(`up-to-date: local=${localV} gitee=${v} (electron-updater 误报,已自检纠正)`);
+      } else {
+        log.info(`up-to-date: local=${localV} gitee=${giteeVersion || 'unknown'}`);
       }
-      log.info(`up-to-date: local=${localV} gitee=${giteeVersion || 'unknown'}`);
       if (silent) return;
-      const giteeV = giteeVersion || '未知';
+      const giteeV = (result && result.updateInfo && result.updateInfo.version) || giteeVersion || '未知';
       return dialog.showMessageBox(win, {
         type: 'info', title: '检查更新',
         message: '当前已是最新版本',
@@ -156,6 +172,7 @@ function registerUpdaterIPC() {
   autoUpdater.on('checking-for-update',  () => sendToRenderer('updater:status', { state: 'checking' }));
   autoUpdater.on('update-available',     (info) => {
     if (menuCheckInProgress) return;
+    if (!isNewerVersion(info.version, app.getVersion())) return;
     sendToRenderer('updater:status', { state: 'available', info });
   });
   autoUpdater.on('update-not-available', (info) => sendToRenderer('updater:status', { state: 'up-to-date', info }));
