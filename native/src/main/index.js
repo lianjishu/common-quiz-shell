@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const { createMenu } = require('./menu');
 const { loadWindowState, saveWindowState } = require('./window-state');
@@ -41,6 +41,32 @@ if (!isDev) {
 
 let mainWindow;
 
+function checkUpdateWithDialog(win) {
+  if (!autoUpdater) {
+    dialog.showMessageBox(win, { type: 'info', title: '检查更新', message: '开发模式下不支持检查更新' });
+    return;
+  }
+  dialog.showMessageBox(win, { type: 'info', title: '检查更新', message: '正在检查更新…' });
+  autoUpdater.checkForUpdates().then((result) => {
+    if (result && result.updateInfo) {
+      const v = result.updateInfo.version;
+      dialog.showMessageBox(win, {
+        type: 'info', title: '发现新版本',
+        message: `发现新版本 v${v}`,
+        detail: '是否立即下载并安装？',
+        buttons: ['下载', '稍后再说'],
+        defaultId: 0, cancelId: 1
+      }).then(({ response }) => {
+        if (response === 0) autoUpdater.downloadUpdate();
+      });
+    } else {
+      dialog.showMessageBox(win, { type: 'info', title: '检查更新', message: '当前已是最新版本' });
+    }
+  }).catch(() => {
+    dialog.showMessageBox(win, { type: 'info', title: '检查更新', message: '当前已是最新版本' });
+  });
+}
+
 function createWindow() {
   const state = loadWindowState();
   mainWindow = new BrowserWindow({
@@ -66,12 +92,25 @@ function createWindow() {
 
   mainWindow.on('close', () => saveWindowState(mainWindow));
   mainWindow.on('closed', () => { mainWindow = null; });
-  createMenu(mainWindow);
+  createMenu(mainWindow, checkUpdateWithDialog);
 
   if (autoUpdater) {
     mainWindow.webContents.once('did-finish-load', () => {
       registerUpdaterIPC();
-      autoUpdater.checkForUpdates().catch((e) => log.warn('checkForUpdates failed', e));
+      autoUpdater.checkForUpdates().then((result) => {
+        if (result && result.updateInfo) {
+          const v = result.updateInfo.version;
+          dialog.showMessageBox(mainWindow, {
+            type: 'info', title: '发现新版本',
+            message: `发现新版本 v${v}`,
+            detail: '是否立即下载并安装？',
+            buttons: ['下载', '稍后再说'],
+            defaultId: 0, cancelId: 1
+          }).then(({ response }) => {
+            if (response === 0) autoUpdater.downloadUpdate();
+          });
+        }
+      }).catch((e) => log.warn('checkForUpdates failed', e));
     });
   }
 }
