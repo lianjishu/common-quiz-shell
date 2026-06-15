@@ -36,6 +36,8 @@ function createMenu(win, onCheckUpdate) {
     {
       label: '帮助',
       submenu: [
+        { label: `当前版本: v${app.getVersion()}`, enabled: false },
+        { type: 'separator' },
         ...(onCheckUpdate ? [{ label: '检查更新', click: () => onCheckUpdate(win) }] : []),
         { label: '关于', click: () => {
           shell.openExternal('https://gitee.com/yake2024/computer-organization-quiz');
