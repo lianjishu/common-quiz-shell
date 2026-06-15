@@ -15,7 +15,7 @@ function createMenu(win) {
       label: 'Edit',
       submenu: [
         { role: 'undo' }, { role: 'redo' }, { type: 'separator' },
-        { role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { role: 'selectAll' }
+        { role: 'cut' }, { role: 'copy' }, { role: 'paste' }
       ]
     },
     {
@@ -33,7 +33,9 @@ function createMenu(win) {
       submenu: [
         { role: 'reload' }, { role: 'forceReload' }, { role: 'toggleDevTools' },
         { type: 'separator' },
-        { role: 'resetZoom' }, { role: 'zoomIn' }, { role: 'zoomOut' },
+        { role: 'resetZoom' },
+        { label: '放大', accelerator: 'CmdOrCtrl+=', click: () => { const f = win.webContents.getZoomFactor(); win.webContents.setZoomFactor(Math.min(3, f + 0.1)); } },
+        { label: '缩小', accelerator: 'CmdOrCtrl+-', click: () => { const f = win.webContents.getZoomFactor(); win.webContents.setZoomFactor(Math.max(0.5, f - 0.1)); } },
         { type: 'separator' },
         { role: 'togglefullscreen' }
       ]
