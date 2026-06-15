@@ -201,7 +201,7 @@ body::after {
   flex: 1;
   margin-left: 260px;
   margin-right: 320px;
-  padding: 32px 48px;
+  padding: 24px 48px;
   display: flex;
   flex-direction: column;
   align-items: center;

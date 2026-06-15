@@ -74,7 +74,7 @@ body::after {
 .stats-btn.danger:hover { background: var(--red); color: var(--paper); }
 
 /* Main */
-.main { flex: 1; margin-left: 276px; margin-right: 340px; padding: 32px 48px; display: flex; flex-direction: column; align-items: center; }
+.main { flex: 1; margin-left: 276px; margin-right: 340px; padding: 24px 48px; display: flex; flex-direction: column; align-items: center; }
 
 /* Top bar */
 .top-bar { width: 100%; max-width: 780px; display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }

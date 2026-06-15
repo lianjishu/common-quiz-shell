@@ -66,10 +66,10 @@ html, body { font-family: var(--sans); background: var(--bg); color: var(--ink);
 .stats-btn.danger:hover::after { background: var(--wrong); }
 
 /* Main */
-.main { flex: 1; margin-left: 240px; margin-right: 280px; padding: 56px 64px; display: flex; flex-direction: column; align-items: center; }
+.main { flex: 1; margin-left: 240px; margin-right: 280px; padding: 32px 48px; display: flex; flex-direction: column; align-items: center; }
 
 /* Top bar */
-.top-bar { width: 100%; max-width: 760px; display: flex; align-items: center; gap: 24px; margin-bottom: 56px; }
+.top-bar { width: 100%; max-width: 760px; display: flex; align-items: center; gap: 24px; margin-bottom: 28px; }
 .progress-wrap { flex: 1; display: flex; flex-direction: column; gap: 10px; }
 .progress-info { display: flex; justify-content: space-between; font-family: var(--display); font-size: 13px; font-style: italic; color: var(--ink-2); }
 .progress-bar { height: 1px; background: var(--line); position: relative; }
@@ -85,17 +85,17 @@ html, body { font-family: var(--sans); background: var(--bg); color: var(--ink);
 .question-card { width: 100%; max-width: 760px; background: transparent; padding: 0; position: relative; animation: fadeIn 0.4s ease; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-.q-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.q-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
 .q-number { font-family: var(--display); font-size: 13px; font-style: italic; color: var(--ink-2); letter-spacing: 0.06em; }
 .q-type { font-family: var(--display); font-size: 13px; font-style: italic; color: var(--ink-2); }
 .q-points { font-family: var(--mono); font-size: 12px; color: var(--ink-2); margin-left: auto; font-style: italic; }
 
-.q-text { font-family: var(--display); font-size: 30px; font-weight: 400; line-height: 1.35; color: var(--ink); margin-bottom: 56px; white-space: pre-wrap; letter-spacing: -0.015em; }
+.q-text { font-family: var(--display); font-size: 30px; font-weight: 400; line-height: 1.35; color: var(--ink); margin-bottom: 28px; white-space: pre-wrap; letter-spacing: -0.015em; }
 
 /* Options */
 .options { border-top: 1px solid var(--line); display: flex; flex-direction: column; }
 .option {
-  display: flex; align-items: baseline; gap: 24px; padding: 22px 0;
+  display: flex; align-items: baseline; gap: 24px; padding: 16px 0;
   background: transparent; cursor: pointer; transition: all 0.2s ease;
   user-select: none; border-bottom: 1px solid var(--line);
 }
@@ -166,7 +166,7 @@ html, body { font-family: var(--sans); background: var(--bg); color: var(--ink);
 .feedback strong { font-style: normal; font-family: var(--sans); font-weight: 500; letter-spacing: 0.04em; font-size: 11px; text-transform: uppercase; margin-right: 8px; }
 
 /* Actions */
-.actions { display: flex; gap: 32px; justify-content: space-between; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line); }
+.actions { display: flex; gap: 32px; justify-content: space-between; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
 .btn { padding: 0; background: transparent; border: none; color: var(--ink); font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--display); letter-spacing: 0.02em; position: relative; }
 .btn::after { content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px; background: var(--ink); transform: scaleX(0); transition: transform 0.2s; transform-origin: left; }
 .btn:hover::after { transform: scaleX(1); }
@@ -181,7 +181,7 @@ html, body { font-family: var(--sans); background: var(--bg); color: var(--ink);
 .empty-state .icon { font-family: var(--display); font-style: italic; font-size: 32px; margin-bottom: 20px; opacity: 0.4; }
 .empty-state p { font-size: 16px; line-height: 1.7; font-family: var(--display); font-style: italic; }
 
-.kbd-hints { display: flex; gap: 24px; justify-content: center; margin-top: 32px; font-size: 12px; color: var(--ink-2); font-family: var(--display); font-style: italic; }
+.kbd-hints { display: flex; gap: 24px; justify-content: center; margin-top: 20px; font-size: 12px; color: var(--ink-2); font-family: var(--display); font-style: italic; }
 .kbd-hints span { display: flex; align-items: center; gap: 6px; }
 kbd { font-family: var(--mono); font-size: 11px; padding: 1px 6px; background: transparent; border: 1px solid var(--line-2); color: var(--ink-2); }
 

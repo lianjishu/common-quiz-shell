@@ -74,7 +74,7 @@ body::after {
 .stats-btn.danger:hover { background: var(--wrong-soft); }
 
 /* Main */
-.main { flex: 1; margin-left: 286px; margin-right: 320px; padding: 32px 48px; display: flex; flex-direction: column; align-items: center; }
+.main { flex: 1; margin-left: 286px; margin-right: 320px; padding: 24px 48px; display: flex; flex-direction: column; align-items: center; }
 
 /* Top bar */
 .top-bar { width: 100%; max-width: 780px; display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
@@ -256,7 +256,7 @@ kbd { font-family: var(--mono); font-size: 12px; padding: 2px 8px; background: v
 .chip:hover { transform: translate(-1px, -1px) rotate(-1deg); box-shadow: 3px 3px 0 rgba(43,36,23,0.25); }
 .chip.active { background: var(--orange-soft); }
 
-.sheet-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 4px 2px; }
+.sheet-grid { flex: 1; overflow-x: hidden; overflow-y: auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 4px 2px; }
 .sheet-tile { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-family: var(--display); font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.12s; position: relative; user-select: none; border: 2.5px solid var(--ink); border-radius: 6px 18px 6px 18px; background: var(--paper-2); }
 .sheet-tile:nth-child(even) { border-radius: 18px 6px 18px 6px; }
 .sheet-tile.empty { color: var(--ink-2); border-style: solid; }
