@@ -49,11 +49,11 @@ GITEE_TOKEN=xxx npm run release
 
 桌面版功能：
 
-- 原生菜单栏：**File / Edit / Theme / View / Help**
-- 窗口位置 / 大小自动记忆（关闭后下次打开还原）
-- `Theme` 菜单切换主题 / `View → Reload` 刷新页面 / `View → Toggle DevTools` 调出开发者工具
-- 开发期热重载（仅 dev 模式，发布构建自动剔除）
-- 启动后 5 秒检测 Gitee 发行版，发现新版本弹 toast，用户点"立即重启"完成更新
+- 原生菜单栏：**文件 / 主题 / 视图 / 帮助**（已中文化；`视图` 含 Reload / DevTools / 缩放 / 全屏；`帮助` 含"当前版本 vX.Y.Z"信息行 + "检查更新" + "关于"）
+- 窗口位置 / 大小 / 最大化状态自动记忆（关闭后下次打开还原）
+- 主题切换：`主题` 菜单 5 套主题 / 浏览器版顶部按钮切换，效果一致，IPC 桥接
+- 开发期热重载（仅 dev 模式，发布构建自动剔除；`ELECTRON_DISABLE_RELOAD=1` 可临时关闭）
+- 自动更新：启动后拉 Gitee Release，发现新版本弹 toast，含**版本号自检**避免同版本误报；菜单"检查更新"主动触发，结果以原生对话框反馈
 - Windows / macOS / Linux 跨平台打包
 
 ---
@@ -77,6 +77,7 @@ GITEE_TOKEN=xxx npm run release
 ```
 计组/
 ├── README.md
+├── 项目结构与打包指南.md    详细打包 / 调试 / 发布流程
 ├── .gitignore
 │
 ├── web/                    HTTP 浏览器版（纯静态）
@@ -132,17 +133,20 @@ GITEE_TOKEN=xxx npm run release
 
 - **350 题**：单选题 199 + 填空题 107 + 判断题 30 + 简答题 14
 - **4 种题型**：单选 / 填空 / 判断 / 简答
-- **答题卡**：右侧 5×70 网格，点击跳转
+- **答题卡**：右侧 5 列网格，按题型分组（每题型内重新编号），点击跳转
 - **类型筛选**：sidebar 按钮按题型过滤
 - **错题回顾**：单独筛选错题
 - **统计面板**：已做 / 正确 / 错误 / 正确率
+- **两侧栏独立收起/展开**：左右栏各自可折叠，偏好持久化到 `localStorage`，收起后无 margin / shadow 残影
+- **填空题显示答案**：Space 键（或界面按钮）揭示填空答案（与简答题交互对齐）
+- **题目文本可选中**：复制题干不再被拦截
 - **进度保存**：`localStorage` 持久化答题进度
 - **主题切换**：5 套主题运行时切换，偏好持久化
-- **桌面版自动更新**：启动后调 `electron-updater` 拉 Gitee Release，发现新版本弹 toast，确认后下载 + 重启安装；未发布 release 时的 404 仅记日志，不弹窗
+- **桌面版自动更新**：启动后调 `electron-updater` 拉 Gitee Release，含版本号自检避免同版本误报；未发布 release 时的 404 仅记日志，不弹窗
 - **键盘快捷键**：
   - `←` `→` 切换题目
   - `Enter` 下一题 / 提交
-  - `Space` 显示简答答案
+  - `Space` 显示答案（简答 / 填空）
   - `1-4` 选择单选选项
 - **随机顺序** + **重置进度**
 
@@ -167,15 +171,29 @@ GITEE_TOKEN=xxx npm run release
 **热重载** — `src/main/index.js` 顶部：
 
 ```js
-require('electron-reload')(
-  ['src/main/index.js', 'src/main/preload.js', 'src/main/menu.js',
-   'src/main/window-state.js', 'src/renderer', 'src/assets'],
-  { awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 50 },
-    ignored: [/node_modules/, /\.git/, /dist/, /\.log$/, /window-state\.json$/] }
-);
+if (process.env.NODE_ENV !== 'production' && !process.env.ELECTRON_DISABLE_RELOAD) {
+  try {
+    require('electron-reload')(
+      [
+        path.join(__dirname, 'index.js'),
+        path.join(__dirname, 'preload.js'),
+        path.join(__dirname, 'menu.js'),
+        path.join(__dirname, 'window-state.js'),
+        path.join(__dirname, '..', 'renderer'),
+        path.join(__dirname, '..', 'assets')
+      ],
+      {
+        awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 50 },
+        ignored: [/node_modules/, /\.git/, /dist/, /\.log$/, /window-state\.json$/]
+      }
+    );
+  } catch (e) {
+    console.warn('[dev] electron-reload skipped:', e.message);
+  }
+}
 ```
 
-`npm run dev` 跑的就是这段。改主进程任意文件或 `src/renderer/` 任意文件，dev 进程自动重启 + 窗口刷新。设 `ELECTRON_DISABLE_RELOAD=1` 可临时关闭热重载。
+`npm run dev` 跑的就是这段。改主进程任意文件或 `src/renderer/` 任意文件，dev 进程自动重启 + 窗口刷新。设 `ELECTRON_DISABLE_RELOAD=1` 可临时关闭热重载；try/catch 防 electron-reload 安装失败硬崩。
 
 **主题桥接** — `src/main/menu.js` 的 `Theme` 子菜单：
 
@@ -205,14 +223,26 @@ if (window.electronAPI && window.electronAPI.onSwitchTheme) {
 }
 ```
 
-**自动更新** — `src/main/index.js` 在窗口 `did-finish-load` 时：
+**自动更新** — `src/main/index.js`：
 
-1. 注册三个 IPC：`updater:check` / `updater:download` / `updater:install`
-2. `autoUpdater.checkForUpdates()` 拉 `package.json → build.publish.url` 指向的 Gitee Release（`https://gitee.com/yake2024/computer-organization-quiz/releases/latest/download/`）
-3. 各阶段事件（`update-available` / `download-progress` / `update-downloaded` / `error`）通过 `webContents.send('updater:status', ...)` 推到渲染进程
-4. `src/renderer/updater.js` 收到后用 toast 通知用户
+1. **版本自检** — `isNewerVersion(remote, local)`（`src/main/index.js:45-55`）逐段比较版本号，避免 `electron-updater` 同版本误报
+2. 启动时 `did-finish-load` 触发 `autoUpdater.checkForUpdates()`（仅 `app.isPackaged`）
+3. 各阶段事件通过 `webContents.send('updater:status', ...)` 推渲染进程；菜单检查期间用 `menuCheckInProgress` 抑制重复 `available` toast
+4. **菜单"检查更新"** — 主动调用 `runUpdateCheck(win, { silent: false })`，三态分支严格区分：
+   - 新版本 → 原生对话框询问"下载 / 稍后"
+   - 已是最新 → 对话框显示 `当前版本: v{local} / Gitee 最新版本: v{remote}`
+   - 检查失败 → 对话框显示真实错误（不再谎报"已是最新"）
+5. `src/renderer/updater.js` 收到后用 toast 通知自动更新进度
 
-`autoUpdater` 只在 `app.isPackaged`（即正式打包后）启用，dev 模式不触发。
+`autoUpdater` 拉 `package.json → build.publish.url` 指向的 Gitee Release（`https://gitee.com/yake2024/computer-organization-quiz/releases/download/latest/`）。
+
+**填空题显示答案** — `src/renderer/app.js`：
+
+`showAnswer()` 统一处理两种类型：
+- 简答题：替换 `essay-answer` 占位为标准答案文本
+- 填空题：把所有 `blank-answer` 节点标 `data-revealed="true"`，CSS 切换为可见答案样式
+
+Space 键触发，与简答题一致。
 
 **Gitee 发布** — `build/publish-gitee.js`：
 
