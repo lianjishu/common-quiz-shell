@@ -257,8 +257,8 @@ kbd { font-family: var(--mono); font-size: 11px; padding: 1px 6px; background: t
 body[data-sidebar-left="closed"]  .side-toggle-left::before  { content: '›'; }
 body[data-sidebar-right="closed"] .side-toggle-right::before { content: '‹'; }
 .sidebar, .answer-sheet, .main { transition: transform 0.25s ease, margin 0.25s ease; }
-body[data-sidebar-left="closed"]  .sidebar      { transform: translateX(-100%); }
-body[data-sidebar-right="closed"] .answer-sheet { transform: translateX(100%); }
+body[data-sidebar-left="closed"]  .sidebar      { transform: translateX(calc(-100% - 30px)); }
+body[data-sidebar-right="closed"] .answer-sheet { transform: translateX(calc(100% + 30px)); }
 body[data-sidebar-left="closed"]  .main         { margin-left: 24px; }
 body[data-sidebar-right="closed"] .main         { margin-right: 24px; }
 
