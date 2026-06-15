@@ -88,8 +88,6 @@ function createWindow() {
 
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
 
-  if (state.isMaximized) mainWindow.maximize();
-
   mainWindow.webContents.setZoomFactor(1);
 
   mainWindow.on('close', () => saveWindowState(mainWindow));

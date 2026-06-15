@@ -16,9 +16,8 @@ function loadWindowState() {
 function saveWindowState(win) {
   if (!win || win.isDestroyed()) return;
   const b = win.getBounds();
-  const state = { ...b, isMaximized: win.isMaximized() };
   try {
-    fs.writeFileSync(stateFile(), JSON.stringify(state, null, 2));
+    fs.writeFileSync(stateFile(), JSON.stringify(b, null, 2));
   } catch (e) {}
 }
 
