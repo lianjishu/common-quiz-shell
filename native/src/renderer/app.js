@@ -92,12 +92,16 @@ function renderQuestion() {
 
   answered = progress[q.id] !== undefined;
 
+  // let html = `
+  //   <div class="q-header">
+  //     <span class="q-number">#${q.id}</span>
+  //     <span class="q-type">${q.type}</span>
+  //     <span class="q-points">${q.points}分</span>
+  //   </div>
+  //   <div class="q-text">${escapeHtml(q.question)}</div>
+  // `;
+
   let html = `
-    <div class="q-header">
-      <span class="q-number">#${q.id}</span>
-      <span class="q-type">${q.type}</span>
-      <span class="q-points">${q.points}分</span>
-    </div>
     <div class="q-text">${escapeHtml(q.question)}</div>
   `;
 
@@ -393,8 +397,10 @@ function updateProgress() {
   const done = filteredIds.filter(id => progress[id] !== undefined).length;
   const pct = total > 0 ? Math.round((currentIndex + 1) / total * 100) : 0;
   const donePct = total > 0 ? Math.round(done / total * 100) : 0;
+  const q = filteredIds.length > 0 ? getQuestionById(filteredIds[currentIndex]) : null;
 
-  document.getElementById('progress-text').textContent = `第 ${currentIndex + 1} 题 / ${total}`;
+  document.getElementById('progress-text').textContent = `# ${currentIndex + 1} / ${total}`;
+  document.getElementById('q-type').textContent = q ? q.type : '';
   document.getElementById('progress-pct').textContent = `${donePct}% 已做`;
   document.getElementById('progress-fill').style.width = `${donePct}%`;
 }
@@ -518,12 +524,12 @@ function renderAnswerSheet() {
   typeOrder.forEach(type => {
     if (!groups[type] || groups[type].length === 0) return;
     html += `<div class="sheet-section-header" data-type="${type}">${type}<span class="sec-count">×${groups[type].length}</span></div>`;
-    html += groups[type].map(q => {
+    html += groups[type].map((q, i) => {
       const state = progress[q.id];
       let cls = 'sheet-tile empty';
       if (state?.result === 'correct') cls = 'sheet-tile correct';
       else if (state?.result === 'wrong') cls = 'sheet-tile wrong';
-      return `<div class="${cls}" data-id="${q.id}" data-type="${q.type}" onclick="goToQuestion(${q.id})" title="#${q.id} · ${q.type}">${String(q.id).padStart(3, '0')}</div>`;
+      return `<div class="${cls}" data-id="${q.id}" data-type="${q.type}" onclick="goToQuestion(${q.id})" title="#${q.id} · ${q.type}">${i + 1}</div>`;
     }).join('');
   });
   grid.innerHTML = html;

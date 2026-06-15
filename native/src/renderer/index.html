@@ -46,6 +46,16 @@
 }
 .theme-option.active .opt-check { visibility: visible; }
 body { -webkit-user-select: none; user-select: none; }
+/* 题目与答案文本允许选中,便于精读/复制 */
+.q-text,
+.blank-answer,
+.essay-answer,
+.feedback,
+.option .opt-text,
+.judge-btn {
+  -webkit-user-select: text;
+  user-select: text;
+}
 </style>
 </head>
 <body>
@@ -93,7 +103,8 @@ body { -webkit-user-select: none; user-select: none; }
     <div class="top-bar">
       <div class="progress-wrap">
         <div class="progress-info">
-          <span id="progress-text">第 1 题 / 350</span>
+          <span id="progress-text">#1/350</span>
+          <span id="q-type">${q.type}</span>
           <span id="progress-pct">0%</span>
         </div>
         <div class="progress-bar">
