@@ -231,7 +231,7 @@ kbd { font-family: var(--mono); font-size: 11px; padding: 1px 6px; background: t
 .chip:hover { border-color: var(--accent); color: var(--accent); }
 .chip.active { border-color: var(--accent); color: var(--accent); font-weight: 500; }
 
-.sheet-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; padding: 0; }
+.sheet-grid { flex: 1; overflow-x: hidden; overflow-y: auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; padding: 0; }
 .sheet-tile { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-family: var(--display); font-size: 13px; cursor: pointer; transition: all 0.18s; position: relative; user-select: none; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }
 .sheet-tile.empty { color: var(--ink-2); }
 .sheet-tile.correct { color: var(--correct); border-bottom-color: var(--correct); font-weight: 500; }
