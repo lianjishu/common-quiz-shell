@@ -451,6 +451,29 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 });
 
 // ============================================
+// SIDEBAR TOGGLE
+// ============================================
+function setSidebarState(side, state) {
+  const key = 'sidebar' + side[0].toUpperCase() + side.slice(1);
+  document.body.dataset[key] = state;
+  localStorage.setItem('sidebar-' + side, state);
+}
+
+function initSidebarToggle() {
+  ['left', 'right'].forEach(side => {
+    const btn = document.getElementById('side-toggle-' + side);
+    if (!btn) return;
+    const saved = localStorage.getItem('sidebar-' + side) ||
+                  (side === 'right' ? 'closed' : 'open');
+    setSidebarState(side, saved);
+    btn.addEventListener('click', () => {
+      const cur = document.body.dataset['sidebar' + side[0].toUpperCase() + side.slice(1)];
+      setSidebarState(side, cur === 'open' ? 'closed' : 'open');
+    });
+  });
+}
+
+// ============================================
 // ANSWER SHEET
 // ============================================
 function renderAnswerSheet() {
@@ -524,6 +547,7 @@ document.querySelectorAll('#sheet-toolbar .chip').forEach(chip => {
 // ============================================
 // INIT
 // ============================================
+initSidebarToggle();
 renderAnswerSheet();
 updateSidebar();
 renderQuestion();

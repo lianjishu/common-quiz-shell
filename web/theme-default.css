@@ -962,6 +962,21 @@ kbd {
 .sheet-legend i.lg-correct { background: var(--tile-correct); }
 .sheet-legend i.lg-wrong { background: var(--tile-wrong); }
 
+/* Sidebar edge toggle buttons */
+.side-toggle { position: fixed; top: 50%; transform: translateY(-50%); width: 24px; height: 40px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; padding: 0; font-family: inherit; font-size: 14px; line-height: 1; color: var(--ink-2); z-index: 101; user-select: none; transition: background 0.15s, color 0.15s; }
+.side-toggle:hover { background: var(--hover); color: var(--ink); }
+.side-toggle-left  { left: 0; }
+.side-toggle-right { right: 0; }
+.side-toggle-left::before  { content: '‹'; }
+.side-toggle-right::before { content: '›'; }
+body[data-sidebar-left="closed"]  .side-toggle-left::before  { content: '›'; }
+body[data-sidebar-right="closed"] .side-toggle-right::before { content: '‹'; }
+.sidebar, .answer-sheet, .main { transition: transform 0.25s ease, margin 0.25s ease; }
+body[data-sidebar-left="closed"]  .sidebar      { transform: translateX(-100%); }
+body[data-sidebar-right="closed"] .answer-sheet { transform: translateX(100%); }
+body[data-sidebar-left="closed"]  .main         { margin-left: 24px; }
+body[data-sidebar-right="closed"] .main         { margin-right: 24px; }
+
 @media (max-width: 1100px) {
   .answer-sheet { display: none; }
   .main { margin-right: 0 !important; }
