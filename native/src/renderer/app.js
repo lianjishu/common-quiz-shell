@@ -115,7 +115,7 @@ function renderQuestion() {
 
   html += `
     <div class="actions">
-      ${q.type === '简答题' ? `<button class="btn btn-primary" onclick="showEssayAnswer()">显示答案</button>` : ''}
+      ${(q.type === '简答题' || q.type === '填空题') ? `<button class="btn btn-primary" onclick="showAnswer()">显示答案</button>` : ''}
       <button class="btn btn-secondary" onclick="prevQuestion()" ${currentIndex === 0 ? 'disabled' : ''}>上一题</button>
       <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()">
         ${currentIndex < filteredIds.length - 1 ? '下一题' : '完成'}
@@ -186,6 +186,8 @@ function renderJudgeButtons(q) {
 function renderBlanks(q) {
   const state = progress[q.id];
   const blankCount = q.blanks ? q.blanks.length : (q.answer.match(/\(\d+\)/g) || []).length || 1;
+  // 已提交 OR 之前"显示答案"过(进度里标了 'shown'),都展示空白答案行
+  const shouldShow = state !== undefined || (state && state.result === 'shown');
   let html = '<div class="blanks">';
 
   for (let i = 0; i < blankCount; i++) {
@@ -206,7 +208,7 @@ function renderBlanks(q) {
         <div style="flex:1">
           <input type="text" class="${inputCls}" value="${escapeHtml(userVal)}"
                  data-index="${i}" placeholder="输入答案..." ${state !== undefined ? 'disabled' : ''}>
-          ${state !== undefined ? `<div class="blank-answer show">正确答案: ${escapeHtml(correctVal)}</div>` : ''}
+          <div class="blank-answer ${shouldShow ? 'show' : ''}">正确答案: ${escapeHtml(correctVal)}</div>
         </div>
       </div>
     `;
@@ -317,6 +319,30 @@ function showEssayAnswer() {
     saveProgress();
     updateSidebar();
   }
+}
+
+function showBlanksAnswer() {
+  const answers = document.querySelectorAll('.blank-answer');
+  if (answers.length === 0) return;
+  const isShowing = answers[0].classList.contains('show');
+  answers.forEach(el => el.classList.toggle('show', !isShowing));
+
+  const q = getQuestionById(filteredIds[currentIndex]);
+  if (q && !progress[q.id]) {
+    const inputs = document.querySelectorAll('.blank-input');
+    const userAnswers = [];
+    inputs.forEach(inp => userAnswers.push(inp.value.trim()));
+    progress[q.id] = { userAnswer: userAnswers, result: 'shown' };
+    saveProgress();
+    updateSidebar();
+  }
+}
+
+function showAnswer() {
+  const q = getQuestionById(filteredIds[currentIndex]);
+  if (!q) return;
+  if (q.type === '简答题') showEssayAnswer();
+  else if (q.type === '填空题') showBlanksAnswer();
 }
 
 // ============================================
@@ -431,9 +457,9 @@ document.addEventListener('keydown', (e) => {
     } else {
       nextQuestion();
     }
-  } else if (e.key === ' ' && q && q.type === '简答题') {
+  } else if (e.key === ' ' && q && (q.type === '简答题' || q.type === '填空题')) {
     e.preventDefault();
-    showEssayAnswer();
+    showAnswer();
   } else if (e.key === 'ArrowLeft') {
     prevQuestion();
   } else if (e.key === 'ArrowRight') {
