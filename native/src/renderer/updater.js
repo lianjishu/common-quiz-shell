@@ -63,6 +63,7 @@
   }
 
   let currentToast = null;
+  let currentToastState = null;
   let progressEl = null;
 
   function dismissToast() {
@@ -71,6 +72,7 @@
       const t = currentToast;
       setTimeout(() => t.remove(), 300);
       currentToast = null;
+      currentToastState = null;
     }
   }
 
@@ -103,6 +105,7 @@
     document.body.appendChild(toast);
     requestAnimationFrame(() => toast.classList.add('show'));
     currentToast = toast;
+    currentToastState = opts.state || null;
   }
 
   function setProgress(percent) {
@@ -131,20 +134,30 @@
     switch (p.state) {
       case 'available':
         showUpdaterToast(`发现新版本 v${p.info.version}，是否下载？`, {
+          state: 'available',
           action: '下载',
           onAction: () => window.electronAPI.downloadUpdate()
         });
         break;
       case 'downloading':
         hideProgress();
-        showUpdaterToast(`正在下载更新… ${Math.round(p.progress.percent)}%`);
+        showUpdaterToast(`正在下载更新… ${Math.round(p.progress.percent)}%`, { state: 'downloading' });
         break;
       case 'downloaded':
         hideProgress();
         showUpdaterToast(`新版本 v${p.info.version} 已下载完成，重启后生效`, {
+          state: 'downloaded',
           action: '立即重启',
           onAction: () => window.electronAPI.quitAndInstall()
         });
+        break;
+      case 'reset':
+        // 菜单检查启动时,主进程要求 renderer 收掉 'available' 残留 toast。
+        // 不会误伤 downloading/downloaded,这两类有用户需要看的进度/操作。
+        if (currentToastState === 'available') {
+          dismissToast();
+          hideProgress();
+        }
         break;
       case 'up-to-date':
         dismissToast();

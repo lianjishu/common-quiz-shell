@@ -1,6 +1,6 @@
 const { contextBridge, ipcRenderer, webFrame } = require('electron');
 
-const VALID_STATES = new Set(['checking', 'available', 'up-to-date', 'downloading', 'downloaded', 'error']);
+const VALID_STATES = new Set(['checking', 'available', 'up-to-date', 'downloading', 'downloaded', 'error', 'reset']);
 
 // Ctrl+滚轮缩放
 window.addEventListener('DOMContentLoaded', () => {

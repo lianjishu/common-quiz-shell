@@ -40,31 +40,67 @@ if (!isDev) {
 }
 
 let mainWindow;
+let menuCheckInProgress = false;
 
-function checkUpdateWithDialog(win) {
+function runUpdateCheck(win, { silent = true } = {}) {
   if (!autoUpdater) {
-    dialog.showMessageBox(win, { type: 'info', title: '检查更新', message: '开发模式下不支持检查更新' });
+    if (!silent) {
+      dialog.showMessageBox(win, { type: 'info', title: '检查更新', message: '开发模式下不支持检查更新' });
+    }
     return;
   }
-  dialog.showMessageBox(win, { type: 'info', title: '检查更新', message: '正在检查更新…' });
-  autoUpdater.checkForUpdates().then((result) => {
-    if (result && result.updateInfo) {
-      const v = result.updateInfo.version;
-      dialog.showMessageBox(win, {
-        type: 'info', title: '发现新版本',
-        message: `发现新版本 v${v}`,
-        detail: '是否立即下载并安装？',
-        buttons: ['下载', '稍后再说'],
-        defaultId: 0, cancelId: 1
-      }).then(({ response }) => {
-        if (response === 0) autoUpdater.downloadUpdate();
+
+  let giteeVersion = null;
+  const onNotAvailable = (info) => { giteeVersion = info && info.version; };
+  autoUpdater.on('update-not-available', onNotAvailable);
+  const cleanup = () => autoUpdater.off('update-not-available', onNotAvailable);
+
+  if (!silent) {
+    sendToRenderer('updater:status', { state: 'reset' });
+    menuCheckInProgress = true;
+  }
+  autoUpdater.checkForUpdates()
+    .then((result) => {
+      cleanup();
+      const localV = app.getVersion();
+      if (result && result.updateInfo) {
+        const v = result.updateInfo.version;
+        return dialog.showMessageBox(win, {
+          type: 'info', title: '发现新版本',
+          message: `发现新版本 v${v}`,
+          detail: `当前版本: v${localV}\n是否立即下载并安装？`,
+          buttons: ['下载', '稍后再说'],
+          defaultId: 0, cancelId: 1
+        }).then(({ response }) => {
+          if (response === 0) autoUpdater.downloadUpdate();
+        });
+      }
+      log.info(`up-to-date: local=${localV} gitee=${giteeVersion || 'unknown'}`);
+      if (silent) return;
+      const giteeV = giteeVersion || '未知';
+      return dialog.showMessageBox(win, {
+        type: 'info', title: '检查更新',
+        message: '当前已是最新版本',
+        detail: `当前版本: v${localV}\nGitee 最新版本: v${giteeV}`
       });
-    } else {
-      dialog.showMessageBox(win, { type: 'info', title: '检查更新', message: '当前已是最新版本' });
-    }
-  }).catch(() => {
-    dialog.showMessageBox(win, { type: 'info', title: '检查更新', message: '当前已是最新版本' });
-  });
+    })
+    .catch((err) => {
+      cleanup();
+      log.error('checkForUpdates failed:', err);
+      if (silent) return;
+      dialog.showMessageBox(win, {
+        type: 'error', title: '检查更新失败',
+        message: '检查更新失败',
+        detail: err ? String(err) : '未知错误，请稍后重试或检查网络'
+      });
+    })
+    .finally(() => {
+      menuCheckInProgress = false;
+    });
+}
+
+function checkUpdateWithDialog(win) {
+  runUpdateCheck(win, { silent: false });
 }
 
 function createWindow() {
@@ -97,20 +133,7 @@ function createWindow() {
   if (autoUpdater) {
     mainWindow.webContents.once('did-finish-load', () => {
       registerUpdaterIPC();
-      autoUpdater.checkForUpdates().then((result) => {
-        if (result && result.updateInfo) {
-          const v = result.updateInfo.version;
-          dialog.showMessageBox(mainWindow, {
-            type: 'info', title: '发现新版本',
-            message: `发现新版本 v${v}`,
-            detail: '是否立即下载并安装？',
-            buttons: ['下载', '稍后再说'],
-            defaultId: 0, cancelId: 1
-          }).then(({ response }) => {
-            if (response === 0) autoUpdater.downloadUpdate();
-          });
-        }
-      }).catch((e) => log.warn('checkForUpdates failed', e));
+      runUpdateCheck(mainWindow, { silent: true });
     });
   }
 }
@@ -131,7 +154,10 @@ function registerUpdaterIPC() {
   ipcMain.on('updater:install',  () => autoUpdater.quitAndInstall());
 
   autoUpdater.on('checking-for-update',  () => sendToRenderer('updater:status', { state: 'checking' }));
-  autoUpdater.on('update-available',     (info) => sendToRenderer('updater:status', { state: 'available', info }));
+  autoUpdater.on('update-available',     (info) => {
+    if (menuCheckInProgress) return;
+    sendToRenderer('updater:status', { state: 'available', info });
+  });
   autoUpdater.on('update-not-available', (info) => sendToRenderer('updater:status', { state: 'up-to-date', info }));
   autoUpdater.on('download-progress',    (p)    => sendToRenderer('updater:status', { state: 'downloading', progress: p }));
   autoUpdater.on('update-downloaded',    (info) => sendToRenderer('updater:status', { state: 'downloaded', info }));
