@@ -73,6 +73,35 @@ function getQuestionById(id) {
   return questions.find(q => q.id === id);
 }
 
+// ============================================
+// ANALYSIS (解析) 渲染
+// ============================================
+function renderAnalysis(q) {
+  if (!q.analysis) return '';
+  const a = q.analysis;
+  // inline 样式:跨 5 主题通用,颜色用 --text 系变量
+  return `
+    <div class="analysis" style="margin-top: 12px; padding: 14px 16px; background: rgba(37,99,235,0.05); border-left: 3px solid #2563EB; border-radius: 6px; font-size: 14px; line-height: 1.7; color: var(--text, #222);">
+      <h4 style="color: #2563EB; font-size: 13px; margin: 0 0 10px 0; font-weight: 600; letter-spacing: 0.5px;">// 解析</h4>
+      ${a.keypoints ? `<div style="margin: 8px 0;"><strong style="color:#2563EB">📋 采分点:</strong><br>${escapeHtml(a.keypoints).replace(/\n/g, '<br>')}</div>` : ''}
+      <div class="analysis-detail">${escapeHtml(a.detail || '').replace(/\n/g, '<br>')}</div>
+      ${a.distractors ? `<div style="margin: 10px 0 4px;"><strong style="color:#dc2626">❌ 干扰项:</strong><ul style="margin: 4px 0 4px 20px; padding: 0;">${a.distractors.map(d => `<li style="margin: 2px 0;">${escapeHtml(d)}</li>`).join('')}</ul></div>` : ''}
+      ${a.brief ? `<div style="margin: 10px 0 0; padding: 8px 12px; background: rgba(245,158,11,0.1); border-radius: 4px; color: #b45309;"><strong>💡 速记:</strong> ${escapeHtml(a.brief).replace(/\n/g, '<br>')}</div>` : ''}
+      ${a.tag ? `<div style="margin-top: 10px; font-size: 12px; opacity: 0.65; color: var(--text-2, #666);"># ${escapeHtml(a.tag)}</div>` : ''}
+    </div>
+  `;
+}
+
+function shouldShowAnalysis(q) {
+  if (!q.analysis) return false;
+  if (q.type === '简答题') {
+    // 由 showEssayAnswer() 控制 essay-answer 的 show,analysis 在内部自动跟随
+    return true;
+  }
+  // 单选/填空/判断:答完题后显示
+  return progress[q.id] !== undefined;
+}
+
 function renderQuestion() {
   const card = document.getElementById('question-card');
 
@@ -109,6 +138,11 @@ function renderQuestion() {
     html += renderBlanks(q);
   } else if (q.type === '简答题') {
     html += renderEssay(q);
+  }
+
+  // 解析:答完题后显示(简答在 essay-answer 内,其他在内容下方)
+  if (q.type !== '简答题' && shouldShowAnalysis(q)) {
+    html += renderAnalysis(q);
   }
 
   html += `<div class="feedback" id="feedback"></div>`;
@@ -230,6 +264,7 @@ function renderEssay(q) {
     <div class="essay-answer" id="essay-answer">
       <h4>// 参考答案</h4>
       <p>${escapeHtml(q.answer)}</p>
+      ${q.analysis ? renderAnalysis(q) : ''}
     </div>
   </div>`;
 
