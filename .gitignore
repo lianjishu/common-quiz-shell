@@ -4,3 +4,4 @@ __pycache__/
 .DS_Store
 Thumbs.db
 项目结构与打包指南.md
+.zcode/

@@ -1,4 +1,4 @@
-const MARKDOWN_DATA = [
+window.QUIZ_QUESTIONS = [
   {
     "id": 1,
     "type": "单选题",

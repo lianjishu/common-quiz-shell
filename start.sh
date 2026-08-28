@@ -2,10 +2,10 @@
 
 echo
 echo "============================================"
-echo "  Computer Organization Quiz - Local Server"
+echo "  Review Quiz Hub - Local Server"
 echo "============================================"
 echo
-echo "  URL: http://localhost:8000/index.html"
+echo "  URL: http://localhost:8000/"
 echo "  Press Ctrl+C to stop"
 echo "============================================"
 echo
@@ -26,7 +26,7 @@ $PYTHON -m http.server 8000 &
 SERVER_PID=$!
 sleep 2
 
-URL="http://localhost:8000/index.html"
+URL="http://localhost:8000/"
 if command -v open >/dev/null 2>&1; then
     open "$URL"
 elif command -v xdg-open >/dev/null 2>&1; then

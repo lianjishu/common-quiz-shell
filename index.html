@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>复习题库 · 科目首页</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&family=Patrick+Hand&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/theme-style4.css" id="theme-link">
+<style>
+/* 科目首页 — 跟随当前主题的 CSS 变量(带回退值,5 套主题通用) */
+body {
+  margin: 0; min-height: 100vh;
+  background: var(--bg, var(--bg-deep, var(--paper, #FAFAF9)));
+  color: var(--ink, var(--text, #1c1917));
+  font-family: var(--sans, 'Noto Sans SC', system-ui, sans-serif);
+  -webkit-user-select: none; user-select: none;
+}
+.hub {
+  max-width: 960px; margin: 0 auto; padding: 64px 24px 48px;
+}
+.hub > header { margin-bottom: 40px; }
+.hub h1 {
+  margin: 0 0 8px; font-size: 32px; font-weight: 600; letter-spacing: 0.01em;
+  font-family: var(--display, 'Fraunces', Georgia, serif);
+}
+.hub .tagline {
+  margin: 0; font-size: 14px; color: var(--ink-2, var(--text-2, #78716c));
+  font-family: 'Fraunces', 'Times New Roman', serif; font-style: italic;
+}
+.grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;
+}
+.subject-card {
+  display: block; text-decoration: none; color: inherit;
+  background: var(--bg-card, var(--paper, #ffffff));
+  border: 1px solid var(--line, var(--border, #e7e5e4)); border-radius: 10px;
+  padding: 24px 24px 20px; position: relative; overflow: hidden;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.subject-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent, #2563EB);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+}
+.subject-card .card-index {
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  font-size: 12px; color: var(--accent, #2563EB); margin-bottom: 10px;
+}
+.subject-card h2 {
+  margin: 0 0 6px; font-size: 20px; font-weight: 600;
+  font-family: var(--display, 'Fraunces', Georgia, serif);
+}
+.subject-card .sub {
+  margin: 0 0 18px; font-size: 13px; color: var(--ink-2, var(--text-2, #78716c));
+  font-family: 'Fraunces', 'Times New Roman', serif; font-style: italic;
+}
+.card-stats {
+  display: flex; gap: 16px; font-size: 13px; margin-bottom: 10px;
+  color: var(--ink-2, var(--text-2, #78716c));
+}
+.card-stats b { color: var(--ink, var(--text, #1c1917)); font-weight: 600; }
+.card-bar {
+  height: 4px; border-radius: 2px; overflow: hidden;
+  background: var(--line, var(--border, #e7e5e4)); margin-bottom: 14px;
+}
+.card-bar i { display: block; height: 100%; background: var(--accent, #2563EB); transition: width 0.3s; }
+.go {
+  font-size: 13px; color: var(--accent, #2563EB);
+  font-family: 'Fraunces', 'Times New Roman', serif; font-style: italic;
+}
+.hub .empty {
+  padding: 48px 0; text-align: center; color: var(--ink-2, var(--text-2, #78716c));
+}
+</style>
+</head>
+<body>
+<div class="hub">
+  <header>
+    <h1>复习题库</h1>
+    <p class="tagline">Pick a subject &amp; start grinding —</p>
+  </header>
+  <div class="grid" id="hub-grid"></div>
+</div>
+
+<script>window.SHARED_BASE = 'shared/';</script>
+<script src="subjects/registry.js"></script>
+<script src="shared/theme.js"></script>
+<script>
+(function () {
+  const grid = document.getElementById('hub-grid');
+  const ids = Array.isArray(window.QUIZ_REGISTRY) ? window.QUIZ_REGISTRY : [];
+
+  function loadScript(src) {
+    return new Promise(resolve => {
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = resolve; // 配置缺失时跳过该科目
+      document.head.appendChild(s);
+    });
+  }
+
+  function renderCard(cfg, index) {
+    const progress = JSON.parse(localStorage.getItem('quiz:' + cfg.id + ':progress') || '{}');
+    const states = Object.values(progress);
+    const done = states.length;
+    const correct = states.filter(s => s && s.result === 'correct').length;
+    const wrong = states.filter(s => s && s.result === 'wrong').length;
+    const graded = correct + wrong;
+    const rate = graded > 0 ? Math.round(correct / graded * 100) : null;
+    const total = cfg.total || done;
+    const pct = total > 0 ? Math.min(100, Math.round(done / total * 100)) : 0;
+
+    const card = document.createElement('a');
+    card.className = 'subject-card';
+    card.href = 'subjects/' + cfg.id + '/index.html';
+    card.innerHTML = `
+      <div class="card-index">SUBJECT-${String(index + 1).padStart(2, '0')}</div>
+      <h2>${cfg.name}</h2>
+      <p class="sub">${cfg.subtitle || ''}</p>
+      <div class="card-stats">
+        <span>已做 <b>${done}</b> / ${total}</span>
+        <span>正确率 <b>${rate === null ? '--' : rate + '%'}</b></span>
+      </div>
+      <div class="card-bar"><i style="width:${pct}%"></i></div>
+      <span class="go">进入复习 →</span>
+    `;
+    grid.appendChild(card);
+  }
+
+  (async () => {
+    if (ids.length === 0) {
+      grid.innerHTML = '<div class="empty">还没有注册科目,请在 subjects/registry.js 中添加。</div>';
+      return;
+    }
+    let shown = 0;
+    for (const id of ids) {
+      await loadScript('subjects/' + id + '/config.js');
+      if (window.QUIZ_SUBJECT && window.QUIZ_SUBJECT.id === id) {
+        renderCard(window.QUIZ_SUBJECT, shown++);
+        window.QUIZ_SUBJECT = null;
+      }
+    }
+    if (shown === 0) {
+      grid.innerHTML = '<div class="empty">科目配置加载失败,请检查 subjects/ 目录。</div>';
+    }
+  })();
+})();
+</script>
+</body>
+</html>

@@ -1,12 +1,12 @@
 @echo off
-title Quiz Server - Computer Organization
+title Quiz Server - Review Hub
 
 echo.
 echo ============================================
-echo   Computer Organization Quiz - Local Server
+echo   Review Quiz Hub - Local Server
 echo ============================================
 echo.
-echo   URL: http://localhost:8000/index.html
+echo   URL: http://localhost:8000/
 echo   Press any key to stop
 echo ============================================
 echo.
@@ -21,7 +21,7 @@ if %errorlevel% neq 0 (
 
 start /B python -m http.server 8000
 timeout /t 2 /nobreak >nul
-start "" "http://localhost:8000/index.html"
+start "" "http://localhost:8000/"
 
 echo Server running... Press any key to stop.
 pause >nul
