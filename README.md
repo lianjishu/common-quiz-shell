@@ -7,7 +7,8 @@
 | 计算机组成原理 | 350 | 单选 / 填空 / 判断 / 简答 | `subjects/computer-organization/` |
 | JavaWeb 期末 | 195 | 单选 / 多选 / 判断 | `subjects/javaweb/` |
 
-> 纯静态页面:HTML + CSS + 原生 JS,零构建、零依赖。Python 只用来跑 `http.server` 起本地服务。
+> **浏览器运行零依赖**:纯静态页面,HTML + CSS + 原生 JS,无构建步骤、无 npm 运行时依赖。Python 只用来跑 `http.server` 起本地服务。
+> 仓库同时包含一个 Electron 桌面版(可选),其依赖均为 devDependencies / 桌面端专用,不影响 Web 版。
 
 ---
 
@@ -29,9 +30,9 @@
 
 ```
 index.html                  科目首页:卡片列出各科目,显示各科进度与正确率
-├── shared/                 通用外壳(只有一份,所有科目共用)
+├── shared/                 通用外壳(全仓库只有这一份,所有科目共用)
 │   ├── app.js              外壳逻辑:布局生成 / 题型渲染 / 判分 / 答题卡 / 快捷键
-│   ├── theme.js            主题切换(SHARED_BASE 前缀,跨目录生效)
+│   ├── theme.js            主题切换(SHARED_BASE 前缀,跨目录生效;含 Electron IPC 桥接)
 │   └── theme-*.css         5 套主题
 ├── subjects/
 │   ├── registry.js         科目注册表:新科目在这里加一行 id
@@ -42,8 +43,12 @@ index.html                  科目首页:卡片列出各科目,显示各科进�
 │   └── javaweb/            同上
 ├── tools/
 │   ├── convert_javaweb.py  exam.md + answers.md → questions.js 转换脚本(含强校验)
-│   └── javaweb_briefs.json 195 条简版解析(id → 一句话考点)
-└── javaweb-final-exam/     javaweb 题源(exam.md + answers.md,转换脚本的输入)
+│   ├── javaweb_briefs.json 195 条简版解析(id → 一句话考点)
+│   └── check_consistency.py 结构与数据一致性校验(见下)
+├── javaweb-final-exam/     javaweb 题源(exam.md + answers.md,转换脚本的输入)
+├── src/main/               Electron 主进程(可选桌面版)
+├── assets/                 应用图标
+└── scripts/                ensure-electron.js / publish-gitee.js(桌面版构建发布)
 ```
 
 **隔离规则**:做题进度按科目存储在 `localStorage["quiz:<科目id>:progress"]`,互不干扰;主题与侧栏折叠偏好是全局的(属外壳)。计组首次启动会自动把旧版无前缀的 `quiz-progress` 迁移到新 key。
@@ -132,9 +137,34 @@ python tools/convert_javaweb.py
 
 ---
 
-## 桌面版(native/)— 已冻结
+## 结构校验
 
-仓库内保留了旧版 Electron 桌面应用(`native/`),它是通用化之前的手工副本,**未接入新外壳**,仅供历史参考。如需恢复桌面版,可让 Electron 加载仓库根目录(`mainWindow.loadFile('../index.html')` 方向)接入新外壳,或参考其更新器/菜单实现。
+```sh
+python tools/check_consistency.py        # 或 npm run check
+```
+
+9 项检查:registry 与目录双向一致、`config.id` 与目录名一致、`config.total` 与实际题数一致、题目 id 唯一、题目题型在 `config.types` 内、科目目录文件完整、README 覆盖所有科目。
+
+其中**第 6 项(外壳唯一性)**尤其重要:`shared/` 之外不允许存在 `app.js` / `theme.js` / `theme-*.css`。通用化重构之前,Electron 的 `src/renderer/` 手工复制过整套外壳并逐渐分叉,导致菜单「主题」静默失效。任何新增副本都会被这项拦下。
+
+退出码 0 = 全过,1 = 有失败项。
+
+---
+
+## 桌面版(Electron)
+
+桌面版已接入同一套外壳 —— 它直接加载仓库根的 `index.html`,与 Web 版**共用** `shared/` 和 `subjects/`,不存在第二份副本。
+
+```sh
+npm install          # 安装 Electron(仅桌面版需要)
+npm run dev          # 开发模式,带热重载
+npm run build:win    # 打包 Windows(nsis + portable + zip)
+npm run release      # 打包并推送到 Gitee Release(自动更新源)
+```
+
+`src/main/` 提供仓库里 Web 版没有的能力:Gitee 自动更新、主题/视图菜单、窗口位置记忆、Ctrl+滚轮缩放。菜单「主题」通过 `preload.js` 的 IPC 桥接到 `shared/theme.js`(浏览器环境下该桥接自动跳过)。
+
+> `appId` 与 `publish.url` 保持不变,以延续已发布版本的自动更新通道。
 
 ---
 
