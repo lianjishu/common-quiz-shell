@@ -8,6 +8,7 @@
     "dev": "electron .",
     "postinstall": "node scripts/ensure-electron.js",
     "build": "electron-builder",
+    "check": "python tools/check_consistency.py",
     "build:win": "electron-builder --win --publish never",
     "build:mac": "electron-builder --mac --publish never",
     "build:linux": "electron-builder --linux --publish never",
