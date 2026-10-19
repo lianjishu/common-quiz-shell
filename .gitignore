@@ -1,7 +1,20 @@
-.claude/
+# ---- Python ----
 __pycache__/
 *.pyc
+
+# ---- Editor / OS ----
+.claude/
+.zcode/
 .DS_Store
 Thumbs.db
-项目结构与打包指南.md
-.zcode/
+
+# ---- Electron / Node ----
+node_modules/
+dist/
+*.log
+dev-app-update.yml
+
+# npx 占位 stub（PATH 缺 node/npm 时 npx 在 cwd 创建的空文件）
+node
+npm
+*@*.*.*

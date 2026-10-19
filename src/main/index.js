@@ -12,8 +12,11 @@ if (process.env.NODE_ENV !== 'production' && !process.env.ELECTRON_DISABLE_RELOA
         path.join(__dirname, 'preload.js'),
         path.join(__dirname, 'menu.js'),
         path.join(__dirname, 'window-state.js'),
-        path.join(__dirname, '..', 'renderer'),
-        path.join(__dirname, '..', 'assets')
+        // 外壳与题库都在仓库根 —— 桌面版与 Web 版共用同一份,不存在副本
+        path.join(__dirname, '..', '..', 'index.html'),
+        path.join(__dirname, '..', '..', 'shared'),
+        path.join(__dirname, '..', '..', 'subjects'),
+        path.join(__dirname, '..', '..', 'assets')
       ],
       {
         awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 50 },
@@ -128,8 +131,8 @@ function createWindow() {
     y: state.y,
     minWidth: 900,
     minHeight: 600,
-    title: '计组练习',
-    icon: path.join(__dirname, '..', 'assets', 'icon.png'),
+    title: '复习题库',
+    icon: path.join(__dirname, '..', '..', 'assets', 'icon.png'),
     backgroundColor: '#ffffff',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -138,7 +141,7 @@ function createWindow() {
     }
   });
 
-  mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+  mainWindow.loadFile(path.join(__dirname, '..', '..', 'index.html'));
 
   mainWindow.webContents.setZoomFactor(1);
 

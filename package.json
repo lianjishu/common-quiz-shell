@@ -1,7 +1,7 @@
 {
   "name": "computer-organization-quiz",
   "version": "1.2.2",
-  "description": "计算机组成原理 350 题练习（多主题）",
+  "description": "多科目复习题库：计算机组成原理 350 题 + JavaWeb 期末 195 题（5 套主题）",
   "author": "yake <yake2024@163.com>",
   "main": "src/main/index.js",
   "scripts": {
@@ -21,8 +21,10 @@
       "output": "dist"
     },
     "files": [
+      "index.html",
+      "shared/**/*",
+      "subjects/**/*",
       "src/main/**/*",
-      "src/renderer/**/*",
       "assets/**/*",
       "package.json"
     ],
