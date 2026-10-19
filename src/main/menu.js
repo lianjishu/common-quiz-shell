@@ -40,7 +40,7 @@ function createMenu(win, onCheckUpdate) {
         { type: 'separator' },
         ...(onCheckUpdate ? [{ label: '检查更新', click: () => onCheckUpdate(win) }] : []),
         { label: '关于', click: () => {
-          shell.openExternal('https://gitee.com/yake2024/computer-organization-quiz');
+          shell.openExternal('https://gitee.com/yake2024/quiz-shell');
         }}
       ]
     }

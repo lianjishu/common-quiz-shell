@@ -182,15 +182,24 @@ if (window.electronAPI && window.electronAPI.onSwitchTheme) {
 
 ---
 
-## 5. 待你确认的一个决策点
+## 5. 已决策:应用身份改名 quiz-shell
 
-**Electron 应用身份是否改名?**
+原身份 `name` / `appId`(`com.yake.computer-organization-quiz`)/ `productName`(`Computer Organization Quiz`)名不副实 —— 应用已是多科目题库。
 
-- `name` / `appId`(`com.yake.computer-organization-quiz`)/ `productName`(`Computer Organization Quiz`)现在名不副实 —— 应用已是多科目题库。
-- **建议本轮不改**:改 `appId` 会破坏 Windows 应用身份与自动更新通道的连续性;改 `productName` 会改变安装包与快捷方式名称,属于独立的破坏性变更。
-- 仅更新 `description` 与窗口标题(阶段 2 已含),把整体改名作为后续独立提交,配合版本号 bump 处理。
+原本担心改名会断掉自动更新通道的连续性,但**该应用尚无推广、没有已安装用户**,破坏性成本为零,故决定一并改掉:
 
-如果你希望这轮就一并改名,告诉我,我在阶段 2 里加上,并把版本 bump 一并纳入。
+| 项 | 旧 | 新 |
+|---|---|---|
+| `name` | `computer-organization-quiz` | `quiz-shell` |
+| `appId` | `com.yake.computer-organization-quiz` | `com.yake.quiz-shell` |
+| `productName` | `Computer Organization Quiz` | `QuizShell` |
+| `version` | `1.2.2` | `1.3.0` |
+| Gitee 仓库 | `yake2024/computer-organization-quiz` | `yake2024/quiz-shell`(**需在 Gitee 网页端手动改**) |
+| `publish.url` / 菜单「关于」 | 旧地址 | 新地址 |
+
+顺带修掉一处既有不一致:`package-lock.json` 的 `name`/`version` 还停留在 `1.0.1`,与 `package.json` 不同步,已一并对齐。
+
+> **依赖**:Gitee 仓库改名前,`npm run release` 会指向不存在的地址而失败。`npm run dev` 与 `npm run build:*` 不受影响。
 
 ---
 
