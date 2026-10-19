@@ -74,3 +74,8 @@ function initTheme() {
 }
 
 initTheme();
+
+// Electron:菜单「主题」→ IPC → 切换主题。浏览器环境无 electronAPI,自动跳过。
+if (window.electronAPI && window.electronAPI.onSwitchTheme) {
+  window.electronAPI.onSwitchTheme(applyTheme);
+}
